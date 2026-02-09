@@ -2558,9 +2558,11 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
             localBroadcastManager.unregisterReceiver(localReceiver);
             localBroadcastManager.unregisterReceiver(messageReceiver);
         }
-        if (mMainMenuAdapter != null) {
-            mMainMenuAdapter.release();
+        MainMenuAdapter adapter = mMainMenuAdapter;
+        if (adapter != null) {
+            adapter.release();
         }
+        mMainMenuAdapter = null;
         VideoUtils.getInstance().onDestroy();
         if (mInternalPassage && mMainActivity != null) {
             mMainActivity.onDestroy(this);
