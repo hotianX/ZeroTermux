@@ -1926,6 +1926,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
     }
 
     private void initMenu() {
+        writerMainMenuConfig(false);
         ZTUserBean ztUserBean = UserSetManage.Companion.get().getZTUserBean();
         if (ztUserBean.isDisableMainConfigMenu()) {
             initListMenu(MainMenuConfig.getMainMenuCategoryDatas());
@@ -1936,15 +1937,24 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
 
     private void writerMainMenuConfig(boolean cover) {
         File mainMenuXmlPathFile = FileIOUtils.INSTANCE.getMainMenuXmlPathFile();
+        Locale systemLocale = getResources().getConfiguration().locale;
+        String language = systemLocale.getLanguage();
+        String targetLang = (!TextUtils.isEmpty(language) && language.equals("en")) ? "en" : "cn";
+
         if (!mainMenuXmlPathFile.exists() || cover) {
-            Locale systemLocale = Locale.getDefault();
-            String language = systemLocale.getLanguage();
-            Log.i(TAG, "writerMainMenuConfig language: " + language);
-            Log.i(TAG, "writerMainMenuConfig language.equals(\"en\"): " + language.equals("en"));
-            if (!TextUtils.isEmpty(language) && language.equals("en")) {
+            Log.i(TAG, "writerMainMenuConfig create new file for language: " + targetLang);
+            if ("en".equals(targetLang)) {
                 UUtils.writerFile("mainmenu/en/zt_menu_config.xml", mainMenuXmlPathFile);
             } else {
                 UUtils.writerFile("mainmenu/cn/zt_menu_config.xml", mainMenuXmlPathFile);
+            }
+        } else {
+            Log.i(TAG, "writerMainMenuConfig smart update for language: " + targetLang);
+            try {
+                com.termux.zerocore.utils.XMLMergeUtils.smartUpdateMenuLanguage(this, targetLang);
+            } catch (Throwable e) {
+                Log.e(TAG, "Critical Error: XMLMergeUtils failed!", e);
+                e.printStackTrace();
             }
         }
     }

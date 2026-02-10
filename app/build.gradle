@@ -113,6 +113,8 @@ android {
         implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
         implementation 'com.mallotec.reb:plugin-locale:1.0.12'
+
+        implementation 'org.jsoup:jsoup:1.22.1'
         // @}
 //        implementation project(":FHttpServer")
         //       implementation project(":z_file")

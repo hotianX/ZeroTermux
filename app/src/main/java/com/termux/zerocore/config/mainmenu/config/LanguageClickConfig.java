@@ -11,6 +11,7 @@ import com.example.xh_lib.utils.LogUtils;
 import com.example.xh_lib.utils.UUtils;
 import com.mallotec.reb.localeplugin.utils.LocaleHelper;
 import com.termux.R;
+import com.termux.app.TermuxActivity;
 import com.termux.zerocore.popuwindow.MenuLeftPopuListWindow;
 
 import org.jetbrains.annotations.Nullable;
@@ -68,6 +69,10 @@ public class LanguageClickConfig extends BaseMenuClickConfig implements MenuLeft
                 LocaleHelper.Companion.getInstance()
                     .language(getLocale("1")).apply(mContext);
                 break;
+        }
+
+        if (mContext instanceof TermuxActivity) {
+            ((TermuxActivity) mContext).restartActivity();
         }
     }
 
