@@ -26,8 +26,81 @@
                 android:textSize="20sp"
                 android:layout_marginLeft="5dp"
                 android:layout_alignParentRight="true"
-                android:text="@string/deepseek_settings_seepseek"
+                android:text="@string/ai_settings_title"
                 android:layout_height="wrap_content"/>
+
+            <!-- AI Provider List Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:textColor="@color/md_grey_500"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/ai_provider_section"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:id="@+id/provider_list_container"
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_marginTop="6dp"
+                android:layout_height="wrap_content"/>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/add_provider_card"
+                android:layout_width="match_parent"
+                app:cardElevation="0dp"
+                android:layout_marginTop="6dp"
+                app:cardBackgroundColor="@color/color_55000000"
+                app:cardCornerRadius="6dp"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:gravity="center"
+                    android:text="@string/ai_provider_add"
+                    android:textColor="@color/color_48baf3"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- System Prompt Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:textColor="@color/md_grey_500"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/ai_system_prompt_section"
+                android:layout_height="wrap_content"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                app:cardElevation="0dp"
+                android:layout_marginTop="6dp"
+                app:cardBackgroundColor="@color/color_55000000"
+                app:cardCornerRadius="6dp"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/system_prompt_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:padding="10dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:gravity="start"
+                    android:textColorHint="@color/md_grey_500"
+                    android:hint="@string/ai_system_prompt_hint"
+                    android:background="@null"
+                    android:inputType="textMultiLine"/>
+
+            </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"

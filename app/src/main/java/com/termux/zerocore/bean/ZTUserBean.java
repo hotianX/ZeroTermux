@@ -34,6 +34,8 @@ public class ZTUserBean {
     private String mDeepSeekApiUrl;
     // 是否让DeepSeek 看见你的终端?
     private boolean mIsDeepSeekVisibleTerminal;
+    // 自定义AI系统提示语
+    private String mCustomSystemPrompt;
     // 是否折叠菜单
     private boolean isCloseFoldMenu;
     // 是否禁用主菜单配置文件
@@ -62,6 +64,14 @@ public class ZTUserBean {
 
     public void setIsDeepSeekVisibleTerminal(boolean mIsDeepSeekVisibleTerminal) {
         this.mIsDeepSeekVisibleTerminal = mIsDeepSeekVisibleTerminal;
+    }
+
+    public String getCustomSystemPrompt() {
+        return mCustomSystemPrompt;
+    }
+
+    public void setCustomSystemPrompt(String customSystemPrompt) {
+        this.mCustomSystemPrompt = customSystemPrompt;
     }
 
     public String getDeepSeekApiUrl() {

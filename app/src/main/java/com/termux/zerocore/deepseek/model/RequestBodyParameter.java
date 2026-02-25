@@ -1,6 +1,7 @@
 package com.termux.zerocore.deepseek.model;
 
-import java.util.ArrayList;
+import com.google.gson.Gson;
+
 import java.util.List;
 
 public class RequestBodyParameter {
@@ -17,22 +18,12 @@ public class RequestBodyParameter {
         this.stream = stream;
     }
 
+    public String toJson() {
+        return new Gson().toJson(this);
+    }
 
     @Override
     public String toString() {
-        return "{" +
-                "\"model\":\"" + model + "\"," +
-                "\"messages\":" + messages +","+
-                "\"stream\":" + stream +
-                '}';
-    }
-
-    public static void main(String[] args) {
-        List<RequestMessageItem> requestMessageItemList = new ArrayList<>();
-        requestMessageItemList.add(new RequestMessageItem("user", "你在干什么"));
-        requestMessageItemList.add(new RequestMessageItem("assistant", "我在睡觉"));
-
-        RequestBodyParameter requestBodyParameter1 = new RequestBodyParameter("deepseek-chat", requestMessageItemList, false);
-        System.out.println(requestBodyParameter1);
+        return toJson();
     }
 }

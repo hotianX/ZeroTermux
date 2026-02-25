@@ -12,16 +12,22 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.cardview.widget.CardView
 import com.example.xh_lib.utils.UUtils
 import com.termux.R
+import com.termux.zerocore.ai.model.ProviderProfile
+import com.termux.zerocore.deepseek.data.ChatDatabaseHelper
 import com.termux.zerocore.deepseek.model.Config
 import com.termux.zerocore.ftp.utils.UserSetManage
 import com.termux.zerocore.url.FileUrl
@@ -43,13 +49,28 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
     private val mAiVisibleSwitch by lazy { findViewById<SwitchCompat>(R.id.ai_visible_switch) }
     private val mAiVisibleLayout by lazy { findViewById<LinearLayout>(R.id.ai_visible_layout) }
 
+    private val mProviderListContainer by lazy { findViewById<LinearLayout>(R.id.provider_list_container) }
+    private val mAddProviderCard by lazy { findViewById<CardView>(R.id.add_provider_card) }
+    private val mSystemPromptEdit by lazy { findViewById<EditText>(R.id.system_prompt_edit) }
 
+    private lateinit var dbHelper: ChatDatabaseHelper
+
+    // Format type display names and values
+    private val formatTypes = arrayOf("openai", "claude", "gemini")
+    private val defaultUrls = mapOf(
+        "openai" to "https://api.openai.com/v1/chat/completions",
+        "claude" to "https://api.anthropic.com/v1/messages",
+        "gemini" to "https://generativelanguage.googleapis.com/v1beta"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_zero_termux_deep_seek_settings)
+        dbHelper = ChatDatabaseHelper(this)
         initView()
         initStatus()
+        initProviderList()
+        initSystemPrompt()
     }
 
     private fun initView() {
@@ -124,6 +145,10 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
            }
        })
 
+        // Add Provider button
+        mAddProviderCard.setOnClickListener {
+            showProviderDialog(null)
+        }
     }
 
     private fun initStatus() {
@@ -146,6 +171,189 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
         mDeepSeekKeySummary.movementMethod = LinkMovementMethod.getInstance()
         mKeyClickSummary.movementMethod = LinkMovementMethod.getInstance()
     }
+
+    // ========================= Provider Management =========================
+
+    private fun initProviderList() {
+        refreshProviderList()
+    }
+
+    private fun refreshProviderList() {
+        mProviderListContainer.removeAllViews()
+        val providers = dbHelper.getAllProviders()
+        for (provider in providers) {
+            addProviderItemView(provider)
+        }
+    }
+
+    private fun addProviderItemView(provider: ProviderProfile) {
+        val itemView = LayoutInflater.from(this)
+            .inflate(R.layout.item_provider_setting, mProviderListContainer, false) as CardView
+
+        val nameText = itemView.findViewById<TextView>(R.id.provider_item_name)
+        val formatText = itemView.findViewById<TextView>(R.id.provider_item_format)
+        val defaultBtn = itemView.findViewById<TextView>(R.id.provider_item_default)
+        val editBtn = itemView.findViewById<TextView>(R.id.provider_item_edit)
+        val deleteBtn = itemView.findViewById<TextView>(R.id.provider_item_delete)
+
+        nameText.text = if (provider.isDefault) {
+            "${provider.name} (${getString(R.string.ai_provider_default_badge)})"
+        } else {
+            provider.name
+        }
+
+        formatText.text = getFormatDisplayName(provider.formatType)
+
+        // Hide "Set Default" button if already default
+        if (provider.isDefault) {
+            defaultBtn.visibility = View.GONE
+        } else {
+            defaultBtn.setOnClickListener {
+                dbHelper.setDefaultProvider(provider.id)
+                Toast.makeText(this, R.string.ai_provider_set_default_done, Toast.LENGTH_SHORT).show()
+                refreshProviderList()
+            }
+        }
+
+        editBtn.setOnClickListener {
+            showProviderDialog(provider)
+        }
+
+        deleteBtn.setOnClickListener {
+            if (dbHelper.getProviderCount() <= 1) {
+                Toast.makeText(this, R.string.ai_provider_delete_last, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            AlertDialog.Builder(this)
+                .setMessage(String.format(getString(R.string.ai_provider_delete_confirm), provider.name))
+                .setPositiveButton(R.string.ai_delete) { _, _ ->
+                    dbHelper.deleteProvider(provider.id)
+                    Toast.makeText(this, R.string.ai_provider_deleted, Toast.LENGTH_SHORT).show()
+                    refreshProviderList()
+                }
+                .setNegativeButton(R.string.ai_cancel, null)
+                .show()
+        }
+
+        mProviderListContainer.addView(itemView)
+    }
+
+    private fun showProviderDialog(existing: ProviderProfile?) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_provider_edit, null)
+        val nameEdit = dialogView.findViewById<EditText>(R.id.provider_name)
+        val formatSpinner = dialogView.findViewById<Spinner>(R.id.provider_format_spinner)
+        val urlEdit = dialogView.findViewById<EditText>(R.id.provider_url)
+        val keyEdit = dialogView.findViewById<EditText>(R.id.provider_key)
+        val modelEdit = dialogView.findViewById<EditText>(R.id.provider_model)
+
+        // Format spinner setup
+        val formatNames = arrayOf(
+            getString(R.string.ai_format_openai),
+            getString(R.string.ai_format_claude),
+            getString(R.string.ai_format_gemini)
+        )
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, formatNames)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        formatSpinner.adapter = adapter
+
+        // Auto-fill URL when format changes
+        formatSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                // Only auto-fill if URL is empty or matches a default URL
+                val currentUrl = urlEdit.text.toString().trim()
+                if (currentUrl.isEmpty() || defaultUrls.values.contains(currentUrl)) {
+                    urlEdit.setText(defaultUrls[formatTypes[position]] ?: "")
+                }
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
+        // Fill existing values if editing
+        if (existing != null) {
+            nameEdit.setText(existing.name)
+            urlEdit.setText(existing.apiUrl)
+            keyEdit.setText(existing.apiKey)
+            modelEdit.setText(existing.modelName)
+            val formatIndex = formatTypes.indexOf(existing.formatType)
+            if (formatIndex >= 0) formatSpinner.setSelection(formatIndex)
+        }
+
+        val title = if (existing != null) getString(R.string.ai_provider_edit) else getString(R.string.ai_provider_add)
+
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(dialogView)
+            .setPositiveButton(R.string.ai_confirm) { _, _ ->
+                val name = nameEdit.text.toString().trim()
+                val url = urlEdit.text.toString().trim()
+                val key = keyEdit.text.toString().trim()
+                val model = modelEdit.text.toString().trim()
+                val formatType = formatTypes[formatSpinner.selectedItemPosition]
+
+                // Validation
+                if (name.isEmpty()) {
+                    Toast.makeText(this, R.string.ai_provider_name_required, Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                if (url.isEmpty()) {
+                    Toast.makeText(this, R.string.ai_provider_url_required, Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                if (model.isEmpty()) {
+                    Toast.makeText(this, R.string.ai_provider_model_required, Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (existing != null) {
+                    existing.name = name
+                    existing.formatType = formatType
+                    existing.apiUrl = url
+                    existing.apiKey = key
+                    existing.modelName = model
+                    dbHelper.updateProvider(existing)
+                } else {
+                    val profile = ProviderProfile(0, name, formatType, url, key, model, false)
+                    dbHelper.insertProvider(profile)
+                }
+
+                Toast.makeText(this, R.string.ai_provider_saved, Toast.LENGTH_SHORT).show()
+                refreshProviderList()
+            }
+            .setNegativeButton(R.string.ai_cancel, null)
+            .show()
+    }
+
+    private fun getFormatDisplayName(formatType: String): String {
+        return when (formatType) {
+            "claude" -> getString(R.string.ai_format_claude)
+            "gemini" -> getString(R.string.ai_format_gemini)
+            else -> getString(R.string.ai_format_openai)
+        }
+    }
+
+    // ========================= System Prompt =========================
+
+    private fun initSystemPrompt() {
+        val ztUserBean = UserSetManage.get().getZTUserBean()
+        val customPrompt = ztUserBean.customSystemPrompt
+        if (!customPrompt.isNullOrEmpty()) {
+            mSystemPromptEdit.setText(customPrompt)
+        } else {
+            mSystemPromptEdit.setText(UUtils.getString(R.string.deepseek_zs))
+        }
+
+        mSystemPromptEdit.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val bean = UserSetManage.get().getZTUserBean()
+                bean.customSystemPrompt = s?.toString() ?: ""
+                UserSetManage.get().setZTUserBean(bean)
+            }
+        })
+    }
+
+    // ========================= Utils =========================
 
     private fun getKeyClickText(keyword: String, text: String, clickableSpan: ClickableSpan) :SpannableString {
         val spannableString = SpannableString(text)

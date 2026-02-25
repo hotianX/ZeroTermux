@@ -1224,6 +1224,40 @@ Enter code recognition parameters separated by commas. These will appear as blue
     <string name="deepseek_settings_ai_get_deepseek_key_4">Enter any name you like.</string>
     <string name="deepseek_settings_ai_get_deepseek_key_5">Copy the key here and paste it into the DeepSeek settings input field in ZT.</string>
 
+    <!-- AI Provider System -->
+    <string name="ai_settings_title">AI Settings</string>
+    <string name="ai_provider_section">AI Providers</string>
+    <string name="ai_provider_add">Add Provider</string>
+    <string name="ai_provider_edit">Edit Provider</string>
+    <string name="ai_provider_delete_confirm">Delete provider \"%s\"?</string>
+    <string name="ai_provider_delete_last">Cannot delete the last provider</string>
+    <string name="ai_provider_name">Name</string>
+    <string name="ai_provider_name_hint">e.g. DeepSeek, OpenAI</string>
+    <string name="ai_provider_format">API Format</string>
+    <string name="ai_provider_url">API URL</string>
+    <string name="ai_provider_url_hint">https://api.example.com/v1/chat/completions</string>
+    <string name="ai_provider_key">API Key</string>
+    <string name="ai_provider_key_hint">Enter your API key</string>
+    <string name="ai_provider_model">Model Name</string>
+    <string name="ai_provider_model_hint">e.g. deepseek-chat, gpt-4o</string>
+    <string name="ai_provider_name_required">Provider name is required</string>
+    <string name="ai_provider_url_required">API URL is required</string>
+    <string name="ai_provider_model_required">Model name is required</string>
+    <string name="ai_provider_saved">Provider saved</string>
+    <string name="ai_provider_deleted">Provider deleted</string>
+    <string name="ai_provider_default_badge">Default</string>
+    <string name="ai_provider_set_default">Set Default</string>
+    <string name="ai_provider_set_default_done">Set as default</string>
+    <string name="ai_format_openai">OpenAI Compatible</string>
+    <string name="ai_format_claude">Anthropic Claude</string>
+    <string name="ai_format_gemini">Google Gemini</string>
+    <string name="ai_system_prompt_section">System Prompt</string>
+    <string name="ai_system_prompt_hint">Enter custom system prompt...</string>
+    <string name="ai_chat_title">AI Assistant</string>
+    <string name="ai_confirm">OK</string>
+    <string name="ai_cancel">Cancel</string>
+    <string name="ai_delete">Delete</string>
+
     <string name="zt_ssh_improt_fail">Import failed: alias missing</string>
     <string name="zt_ssh_improt_fail_error">Import failed</string>
     <string name="zt_ssh_improt_success">Key import successful\nSaved as:</string>

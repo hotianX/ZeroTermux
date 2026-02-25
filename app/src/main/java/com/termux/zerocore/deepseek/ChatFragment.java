@@ -9,9 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,12 +28,14 @@ import com.example.xh_lib.utils.LogUtils;
 import com.example.xh_lib.utils.UUtils;
 import com.termux.R;
 import com.termux.app.TermuxActivity;
+import com.termux.zerocore.ai.model.AIClient;
+import com.termux.zerocore.ai.model.ProviderProfile;
+import com.termux.zerocore.ai.provider.AIProvider;
 import com.termux.zerocore.deepseek.data.ChatDatabaseHelper;
 import com.termux.zerocore.deepseek.data.ChatMessage;
 import com.termux.zerocore.deepseek.data.ChatMessageAdapter;
 import com.termux.zerocore.deepseek.data.ChatSession;
 import com.termux.zerocore.deepseek.model.Config;
-import com.termux.zerocore.deepseek.model.DeepSeekClient;
 import com.termux.zerocore.deepseek.model.RequestMessageItem;
 import com.termux.zerocore.ftp.utils.UserSetManage;
 
@@ -48,7 +53,11 @@ public class ChatFragment extends Fragment {
     private View mView;
     private Intent mIntent;
 
-    private DeepSeekClient deepSeekClient = new DeepSeekClient();
+    private AIClient aiClient = new AIClient();
+    private AIProvider currentProvider;
+    private ProviderProfile currentProfile;
+    private List<ProviderProfile> providerList = new ArrayList<>();
+    private Spinner providerSpinner;
     private List<RequestMessageItem> requestMessageItemList = new ArrayList<>();
     private static ChatFragment chatFragment;
 
@@ -97,16 +106,28 @@ public class ChatFragment extends Fragment {
     private void initView() {
         dbHelper = new ChatDatabaseHelper(getContext());
 
+        // Load default provider
+        loadDefaultProvider();
+
         chatRecyclerView = mView.findViewById(R.id.chatRecyclerView);
         mCancel = mView.findViewById(R.id.cancel);
         messageInput = mView.findViewById(R.id.messageInput);
         sendButton = mView.findViewById(R.id.sendButton);
         testText = mView.findViewById(R.id.testText);
+        providerSpinner = mView.findViewById(R.id.provider_spinner);
+
+        // Initialize provider spinner
+        initProviderSpinner();
 
         if (mIntent == null) {
             LogUtils.e(TAG, "initView intent is null return.");
             return;
         }
+
+        // Clear state from previous session to prevent leakage
+        requestMessageItemList.clear();
+        mText.setLength(0);
+        newMsg = true;
 
         boolean isNew = mIntent.getBooleanExtra("isNew", false);
         if (isNew) {
@@ -171,8 +192,9 @@ public class ChatFragment extends Fragment {
 
     private void creareS(String name) {
         if (createS) {
-            currentSession = new ChatSession(sessionId, name, System.currentTimeMillis());
-            dbHelper.insertSession(currentSession.getSessionId(), currentSession.getSessionName());
+            long providerId = currentProfile != null ? currentProfile.getId() : 0;
+            currentSession = new ChatSession(sessionId, name, System.currentTimeMillis(), providerId);
+            dbHelper.insertSession(currentSession.getSessionId(), currentSession.getSessionName(), providerId);
         }
         createS = false;
     }
@@ -182,51 +204,58 @@ public class ChatFragment extends Fragment {
         sendButton.setText("...");
         mCancel.setVisibility(View.GONE);
         sendButton.setEnabled(false);
+        providerSpinner.setEnabled(false);
         reqModel(message);
     }
 
     StringBuilder mText = new StringBuilder();
 
     private void reqModel(String text) {
+        // Clear mText at start to prevent stale data from previous errors
+        mText.setLength(0);
 
-        requestMessageItemList.add(new RequestMessageItem("user", text));
-        Log.i(TAG, "reqModelxxxxxxxxx: " + getPrompt());
-        requestMessageItemList.add(new RequestMessageItem("system", getPrompt()));
+        requestMessageItemList.add(new RequestMessageItem(RequestMessageItem.ROLE_USER, text));
 
-        deepSeekClient.ask(requestMessageItemList, true, new DeepSeekClient.Lis() {
-            @Override
-            public void error() {
-                System.out.println("\n处理失败（服务器响应超时）");
-                input();
-            }
+        // System prompt is passed separately — providers place it per their API requirements
+        String systemPrompt = getPrompt();
 
-            @Override
-            public void msg(String msg, boolean isError) {
-                String mMsg = deepSeekClient.getMsg(msg);
-                LogUtils.e(TAG, "end insertMessage msg mMsg: " + mMsg);
-                mText.append(mMsg);
-                UUtils.runOnUIThread(() -> {
-                    LogUtils.e(TAG, "end insertMessage msg mText: " + mText);
-                    localProcessingMessage(mMsg, isError);
-                });
-            }
-
-            @Override
-            public void end() {
-                input();
-                LogUtils.e(TAG, "end insertMessage mText: " + mText);
-                if (mText.length() > 0) {
+        aiClient.ask(currentProvider, currentProfile, requestMessageItemList, systemPrompt,
+            new AIClient.Listener() {
+                @Override
+                public void onError(String errorMessage) {
+                    LogUtils.e(TAG, "AI request error: " + errorMessage);
+                    mText.setLength(0);
                     UUtils.runOnUIThread(() -> {
-                        String msg = mText.toString();
-                        LogUtils.e(TAG, "end insertMessage sessionId: " + sessionId + " ,msg: " + msg);
-                        dbHelper.insertMessage(sessionId, msg, false, System.currentTimeMillis(), 1);
-                        mText.delete(0, mText.length());
-                        newMsg = true;
+                        localProcessingMessage(errorMessage, true);
                     });
                 }
 
-            }
-        });
+                @Override
+                public void onMessage(String content) {
+                    LogUtils.e(TAG, "onMessage content: " + content);
+                    mText.append(content);
+                    UUtils.runOnUIThread(() -> {
+                        LogUtils.e(TAG, "onMessage mText: " + mText);
+                        localProcessingMessage(content, false);
+                    });
+                }
+
+                @Override
+                public void onComplete() {
+                    input();
+                    LogUtils.e(TAG, "onComplete mText: " + mText);
+                    if (mText.length() > 0) {
+                        UUtils.runOnUIThread(() -> {
+                            String msg = mText.toString();
+                            LogUtils.e(TAG, "onComplete insertMessage sessionId: " + sessionId + " ,msg: " + msg);
+                            dbHelper.insertMessage(sessionId, msg, false, System.currentTimeMillis(), 1);
+                            requestMessageItemList.add(new RequestMessageItem(RequestMessageItem.ROLE_ASSISTANT, msg));
+                            mText.delete(0, mText.length());
+                            newMsg = true;
+                        });
+                    }
+                }
+            });
     }
 
 
@@ -235,6 +264,7 @@ public class ChatFragment extends Fragment {
             sendButton.setText("send");
             mCancel.setVisibility(View.VISIBLE);
             sendButton.setEnabled(true);
+            providerSpinner.setEnabled(true);
         });
     }
 
@@ -257,29 +287,104 @@ public class ChatFragment extends Fragment {
         updateM(msg, isError);
     }
 
+    private void initProviderSpinner() {
+        providerList.clear();
+        providerList.addAll(dbHelper.getAllProviders());
+
+        List<String> providerNames = new ArrayList<>();
+        for (ProviderProfile p : providerList) {
+            providerNames.add(p.getName());
+        }
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+            getContext(), android.R.layout.simple_spinner_item, providerNames);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        providerSpinner.setAdapter(spinnerAdapter);
+
+        // Set initial selection to default provider
+        int defaultIndex = 0;
+        for (int i = 0; i < providerList.size(); i++) {
+            if (providerList.get(i).isDefault()) {
+                defaultIndex = i;
+                break;
+            }
+        }
+        providerSpinner.setSelection(defaultIndex);
+
+        providerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            private boolean isFirstSelection = true;
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (isFirstSelection) {
+                    isFirstSelection = false;
+                    return;
+                }
+                if (position >= 0 && position < providerList.size()) {
+                    currentProfile = providerList.get(position);
+                    currentProvider = AIClient.getProvider(currentProfile.getFormatType());
+                    // Clear conversation context when switching providers
+                    requestMessageItemList.clear();
+                    mText.setLength(0);
+                    newMsg = true;
+                    // Update session provider
+                    if (sessionId != null) {
+                        dbHelper.updateSessionProvider(sessionId, currentProfile.getId());
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void loadDefaultProvider() {
+        currentProfile = dbHelper.getDefaultProvider();
+        if (currentProfile != null) {
+            currentProvider = AIClient.getProvider(currentProfile.getFormatType());
+        } else {
+            // Fallback: use OpenAI-compatible with DeepSeek defaults
+            currentProvider = AIClient.getProvider("openai");
+            currentProfile = new ProviderProfile(0, "DeepSeek", "openai",
+                "https://api.deepseek.com/chat/completions",
+                UserSetManage.Companion.get().getZTUserBean().getDeepSeekApiKey(),
+                "deepseek-chat", true);
+        }
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mDeepSeekTransitFragment = null;
         adapter.release();
+        chatFragment = null;
     }
 
     // 获取终端助手提示语
     private String getPrompt() {
         boolean isDeepSeekVisibleTerminal = UserSetManage.Companion.get().getZTUserBean().isIsDeepSeekVisibleTerminal();
-        String terminalCommands = com.termux.zerocore.utils.SingletonCommunicationUtils.getInstance().getmSingletonCommunicationListener().getTextToTerminal()
-            .replace("$", "")
-            .replace("~", "")
-            .replace("\n", "")
-            .trim();
-        if (terminalCommands.length() > Config.MAX_VISIBLE) {
-            terminalCommands = terminalCommands.substring(terminalCommands.length() - Config.MAX_VISIBLE);
-        }
-        LogUtils.e(TAG, "getPrompt: " + terminalCommands);
-        if (isDeepSeekVisibleTerminal) {
-            return UUtils.getString(R.string.deepseek_zs) + UUtils.getString(R.string.deepseek_zs_command) + terminalCommands;
+        String customPrompt = UserSetManage.Companion.get().getZTUserBean().getCustomSystemPrompt();
+        String basePrompt;
+        if (customPrompt != null && !customPrompt.isEmpty()) {
+            basePrompt = customPrompt;
         } else {
-            return UUtils.getString(R.string.deepseek_zs);
+            basePrompt = UUtils.getString(R.string.deepseek_zs);
+        }
+
+        if (isDeepSeekVisibleTerminal) {
+            String terminalCommands = com.termux.zerocore.utils.SingletonCommunicationUtils.getInstance().getmSingletonCommunicationListener().getTextToTerminal()
+                .replace("$", "")
+                .replace("~", "")
+                .replace("\n", "")
+                .trim();
+            if (terminalCommands.length() > Config.MAX_VISIBLE) {
+                terminalCommands = terminalCommands.substring(terminalCommands.length() - Config.MAX_VISIBLE);
+            }
+            LogUtils.e(TAG, "getPrompt: " + terminalCommands);
+            return basePrompt + UUtils.getString(R.string.deepseek_zs_command) + terminalCommands;
+        } else {
+            return basePrompt;
         }
     }
 }
