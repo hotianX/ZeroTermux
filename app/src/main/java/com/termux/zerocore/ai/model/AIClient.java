@@ -5,7 +5,7 @@ import com.termux.zerocore.ai.provider.AIProvider;
 import com.termux.zerocore.ai.provider.ClaudeProvider;
 import com.termux.zerocore.ai.provider.GeminiProvider;
 import com.termux.zerocore.ai.provider.OpenAIProvider;
-import com.termux.zerocore.deepseek.model.RequestMessageItem;
+import com.termux.zerocore.llm.model.RequestMessageItem;
 
 import okhttp3.Call;
 import okhttp3.Callback;

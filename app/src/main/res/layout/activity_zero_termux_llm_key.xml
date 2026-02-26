@@ -26,7 +26,7 @@
                 android:textSize="20sp"
                 android:layout_marginLeft="5dp"
                 android:layout_alignParentRight="true"
-                android:text="@string/deepseek_settings_ai_get_deepseek_key"
+                android:text="@string/llm_settings_ai_get_key"
                 android:layout_height="wrap_content"/>
 
             <androidx.cardview.widget.CardView
@@ -50,14 +50,14 @@
                         android:textColor="@color/md_grey_500"
                         android:textStyle="bold"
                         android:textSize="13sp"
-                        android:text="@string/deepseek_settings_ai_get_deepseek_key_1"
+                        android:text="@string/llm_settings_ai_get_key_1"
                         android:layout_height="wrap_content"/>
 
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_marginTop="10dp"
                         android:scaleType="fitXY"
-                        android:src="@mipmap/deepseek1"
+                        android:src="@mipmap/llm_key_step_1"
                         android:layout_height="240dp"/>
 
                     <TextView
@@ -67,14 +67,14 @@
                         android:textColor="@color/md_grey_500"
                         android:textStyle="bold"
                         android:textSize="13sp"
-                        android:text="@string/deepseek_settings_ai_get_deepseek_key_2"
+                        android:text="@string/llm_settings_ai_get_key_2"
                         android:layout_height="wrap_content"/>
 
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_marginTop="10dp"
                         android:scaleType="fitXY"
-                        android:src="@mipmap/deepseek2"
+                        android:src="@mipmap/llm_key_step_2"
                         android:layout_height="270dp"/>
 
                     <TextView
@@ -84,14 +84,14 @@
                         android:textColor="@color/md_grey_500"
                         android:textStyle="bold"
                         android:textSize="13sp"
-                        android:text="@string/deepseek_settings_ai_get_deepseek_key_3"
+                        android:text="@string/llm_settings_ai_get_key_3"
                         android:layout_height="wrap_content"/>
 
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_marginTop="10dp"
                         android:scaleType="fitXY"
-                        android:src="@mipmap/deepseek3"
+                        android:src="@mipmap/llm_avatar_1"
                         android:layout_height="200dp"/>
 
                     <TextView
@@ -100,14 +100,14 @@
                         android:textColor="@color/md_grey_500"
                         android:textStyle="bold"
                         android:textSize="13sp"
-                        android:text="@string/deepseek_settings_ai_get_deepseek_key_4"
+                        android:text="@string/llm_settings_ai_get_key_4"
                         android:layout_height="wrap_content"/>
 
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_marginTop="10dp"
                         android:scaleType="fitXY"
-                        android:src="@mipmap/deepseek4"
+                        android:src="@mipmap/llm_avatar_2"
                         android:layout_height="220dp"/>
 
                     <TextView
@@ -116,14 +116,14 @@
                         android:textColor="@color/md_grey_500"
                         android:textStyle="bold"
                         android:textSize="13sp"
-                        android:text="@string/deepseek_settings_ai_get_deepseek_key_5"
+                        android:text="@string/llm_settings_ai_get_key_5"
                         android:layout_height="wrap_content"/>
 
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_marginTop="10dp"
                         android:scaleType="fitXY"
-                        android:src="@mipmap/deepseek5"
+                        android:src="@mipmap/llm_avatar_3"
                         android:layout_height="220dp"/>
 
                 </LinearLayout>

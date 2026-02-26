@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.data;
+package com.termux.zerocore.llm.data;
 
 import java.util.List;
 

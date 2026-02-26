@@ -118,8 +118,8 @@ import com.termux.zerocore.config.mainmenu.data.MainMenuCategoryData;
 import com.termux.zerocore.config.mainmenu.view.adapter.MainMenuAdapter;
 import com.termux.zerocore.config.other.ZTGitHubVersion;
 import com.termux.zerocore.config.ztcommand.config.XmlMenuConfig;
-import com.termux.zerocore.deepseek.DeepSeekTransitFragment;
-import com.termux.zerocore.deepseek.markdown.MarkDownAPI;
+import com.termux.zerocore.llm.LLMTransitFragment;
+import com.termux.zerocore.llm.markdown.MarkDownAPI;
 import com.termux.zerocore.dialog.BeautifySettingDialog;
 import com.termux.zerocore.dialog.CommonCommandsDialog;
 import com.termux.zerocore.dialog.DownLoadDialogBoom;
@@ -753,7 +753,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         findViewById(R.id.select_new_session_button).setOnClickListener(v -> {
             indexSwitch(1);
         });
-        findViewById(R.id.deepseek).setOnClickListener(view -> {
+        findViewById(R.id.llm_chat).setOnClickListener(view -> {
             indexSwitch(0);
             fragmentManager(1);
         });
@@ -1996,14 +1996,14 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         LogUtils.e(TAG, "fragmentManager fragmentTransaction is: " + fragmentTransaction);
 
         // 1. 先移除可能存在的所有 Fragment
-        Fragment deepSeekFragment = getSupportFragmentManager()
-            .findFragmentByTag("DeepSeekTransitFragment");
+        Fragment llmFragment = getSupportFragmentManager()
+            .findFragmentByTag("LLMTransitFragment");
         Fragment fileListFragment = getSupportFragmentManager()
             .findFragmentByTag("ZFileListFragment");
 
-        if (deepSeekFragment != null) {
-            fragmentTransaction.remove(deepSeekFragment);
-            LogUtils.e(TAG, "Removed existing DeepSeekTransitFragment");
+        if (llmFragment != null) {
+            fragmentTransaction.remove(llmFragment);
+            LogUtils.e(TAG, "Removed existing LLMTransitFragment");
         }
 
         if (fileListFragment != null) {
@@ -2029,11 +2029,11 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 LogUtils.e(TAG, "fragmentManager switch ZFileListFragment deno. ");
                 break;
             case 1:
-                LogUtils.e(TAG, "fragmentManager switch DeepSeekTransitFragment. ");
-                DeepSeekTransitFragment deepSeekTransitFragment = DeepSeekTransitFragment.newInstance();
-                fragmentTransaction.replace(R.id.frame_file, deepSeekTransitFragment, "DeepSeekMainFragment")
+                LogUtils.e(TAG, "fragmentManager switch LLMTransitFragment. ");
+                LLMTransitFragment llmTransitFragment = LLMTransitFragment.newInstance();
+                fragmentTransaction.replace(R.id.frame_file, llmTransitFragment, "LLMMainFragment")
                     .commitAllowingStateLoss();
-                LogUtils.e(TAG, "fragmentManager switch DeepSeekTransitFragment deno. ");
+                LogUtils.e(TAG, "fragmentManager switch LLMTransitFragment done. ");
                 break;
         }
         ZTConfig.INSTANCE.setCloseListener(() -> getDrawer().smoothClose());

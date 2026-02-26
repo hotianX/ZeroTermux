@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.data;
+package com.termux.zerocore.llm.data;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.xh_lib.utils.LogUtils;
 import com.example.xh_lib.utils.UUtils;
 import com.termux.R;
-import com.termux.zerocore.deepseek.DeepSeekTransitFragment;
+import com.termux.zerocore.llm.LLMTransitFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,13 +28,13 @@ public class ChatSessionAdapter extends RecyclerView.Adapter<ChatSessionAdapter.
     private Context context;
     private List<ChatSession> sessions;
     private ChatDatabaseHelper dbHelper;
-    private DeepSeekTransitFragment mDeepSeekTransitFragment;
+    private LLMTransitFragment mLLMTransitFragment;
 
-    public ChatSessionAdapter(Context context, List<ChatSession> sessions, DeepSeekTransitFragment deepSeekTransitFragment) {
+    public ChatSessionAdapter(Context context, List<ChatSession> sessions, LLMTransitFragment llmTransitFragment) {
         this.context = context;
         this.sessions = sessions;
         this.dbHelper = new ChatDatabaseHelper(context);
-        this.mDeepSeekTransitFragment = deepSeekTransitFragment;
+        this.mLLMTransitFragment = llmTransitFragment;
     }
 
     @NonNull
@@ -57,7 +57,7 @@ public class ChatSessionAdapter extends RecyclerView.Adapter<ChatSessionAdapter.
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.putExtra("sessionId", session.getSessionId());
-            mDeepSeekTransitFragment.switchFragment(1, intent);
+            mLLMTransitFragment.switchFragment(1, intent);
         });
 
         holder.itemView.setOnLongClickListener(v -> {
@@ -74,7 +74,7 @@ public class ChatSessionAdapter extends RecyclerView.Adapter<ChatSessionAdapter.
 
     private void showEditDialog(ChatSession session) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(UUtils.getString(R.string.deepseek_settings_ai_session_name));
+        builder.setTitle(UUtils.getString(R.string.llm_settings_ai_session_name));
 
         final EditText input = new EditText(context);
         input.setText(session.getSessionName());
@@ -116,6 +116,6 @@ public class ChatSessionAdapter extends RecyclerView.Adapter<ChatSessionAdapter.
     }
 
     public void release() {
-        mDeepSeekTransitFragment = null;
+        mLLMTransitFragment = null;
     }
 }

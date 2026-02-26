@@ -25,14 +25,14 @@ public class ZTUserBean {
     private boolean isInternalPassage = false;
     //在线服务器设定本地保存
     private String mServerJsonString;
-    // deepseek 本地蓝色连接字点击
+    // LLM 本地蓝色连接字点击
     private String mCommandLink;
 
-    //DeepSeek api Key
+    // LLM api Key (字段名保留，Gson序列化兼容)
     private String mDeepSeekApiKey;
-    // DeepSeek url
+    // LLM url (字段名保留，Gson序列化兼容)
     private String mDeepSeekApiUrl;
-    // 是否让DeepSeek 看见你的终端?
+    // 是否让AI看见你的终端? (字段名保留，Gson序列化兼容)
     private boolean mIsDeepSeekVisibleTerminal;
     // 自定义AI系统提示语
     private String mCustomSystemPrompt;
@@ -58,11 +58,11 @@ public class ZTUserBean {
         isCloseFoldMenu = foldMenu;
     }
 
-    public boolean isIsDeepSeekVisibleTerminal() {
+    public boolean isIsLlmVisibleTerminal() {
         return mIsDeepSeekVisibleTerminal;
     }
 
-    public void setIsDeepSeekVisibleTerminal(boolean mIsDeepSeekVisibleTerminal) {
+    public void setIsLlmVisibleTerminal(boolean mIsDeepSeekVisibleTerminal) {
         this.mIsDeepSeekVisibleTerminal = mIsDeepSeekVisibleTerminal;
     }
 
@@ -74,19 +74,19 @@ public class ZTUserBean {
         this.mCustomSystemPrompt = customSystemPrompt;
     }
 
-    public String getDeepSeekApiUrl() {
+    public String getLlmApiUrl() {
         return mDeepSeekApiUrl;
     }
 
-    public void setDeepSeekApiUrl(String mDeepSeekApiUrl) {
+    public void setLlmApiUrl(String mDeepSeekApiUrl) {
         this.mDeepSeekApiUrl = mDeepSeekApiUrl;
     }
 
-    public String getDeepSeekApiKey() {
+    public String getLlmApiKey() {
         return mDeepSeekApiKey;
     }
 
-    public void setDeepSeekApiKey(String mDeepSeekApiKey) {
+    public void setLlmApiKey(String mDeepSeekApiKey) {
         this.mDeepSeekApiKey = mDeepSeekApiKey;
     }
 

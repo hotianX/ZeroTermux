@@ -93,11 +93,11 @@
             android:name=".zerocore.settings.ZeroTermuxSettingsActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:name=".zerocore.deepseek.activity.ZeroTermuxDeepSeekSettingsActivity"
+        <activity android:name=".zerocore.llm.activity.ZeroTermuxLLMSettingsActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
-        <activity android:name=".zerocore.deepseek.activity.ZeroTermuxDeepSeekKeyActivity"
+        <activity android:name=".zerocore.llm.activity.ZeroTermuxLLMKeyActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 

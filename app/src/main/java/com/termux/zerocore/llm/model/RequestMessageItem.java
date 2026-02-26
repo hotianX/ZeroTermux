@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.model;
+package com.termux.zerocore.llm.model;
 
 public class RequestMessageItem {
     public static final String ROLE_USER = "user";

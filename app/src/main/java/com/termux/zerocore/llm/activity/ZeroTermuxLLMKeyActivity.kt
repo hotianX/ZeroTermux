@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.activity
+package com.termux.zerocore.llm.activity
 
 import android.content.Intent
 import android.net.Uri
@@ -14,14 +14,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.xh_lib.utils.UUtils
 import com.termux.R
 
-class ZeroTermuxDeepSeekKeyActivity : AppCompatActivity() {
+class ZeroTermuxLLMKeyActivity : AppCompatActivity() {
     private val mTitle1 by lazy { findViewById<TextView>(R.id.title_1) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_zero_termux_deep_seek_key)
-        mTitle1.text = getKeyClickText(UUtils.getString(R.string.deepseek_settings_ai_get_deepseek_key_1_keyword),
-            UUtils.getString(R.string.deepseek_settings_ai_get_deepseek_key_1), object : ClickableSpan() {
+        setContentView(R.layout.activity_zero_termux_llm_key)
+        mTitle1.text = getKeyClickText(UUtils.getString(R.string.llm_settings_ai_get_key_1_keyword),
+            UUtils.getString(R.string.llm_settings_ai_get_key_1), object : ClickableSpan() {
                 override fun onClick(p0: View) {
                     val intent = Intent()
                     intent.data = Uri.parse("https://platform.deepseek.com/") //Url 就是你要打开的网址

@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek;
+package com.termux.zerocore.llm;
 
 import android.content.Context;
 import android.content.Intent;
@@ -31,12 +31,12 @@ import com.termux.app.TermuxActivity;
 import com.termux.zerocore.ai.model.AIClient;
 import com.termux.zerocore.ai.model.ProviderProfile;
 import com.termux.zerocore.ai.provider.AIProvider;
-import com.termux.zerocore.deepseek.data.ChatDatabaseHelper;
-import com.termux.zerocore.deepseek.data.ChatMessage;
-import com.termux.zerocore.deepseek.data.ChatMessageAdapter;
-import com.termux.zerocore.deepseek.data.ChatSession;
-import com.termux.zerocore.deepseek.model.Config;
-import com.termux.zerocore.deepseek.model.RequestMessageItem;
+import com.termux.zerocore.llm.data.ChatDatabaseHelper;
+import com.termux.zerocore.llm.data.ChatMessage;
+import com.termux.zerocore.llm.data.ChatMessageAdapter;
+import com.termux.zerocore.llm.data.ChatSession;
+import com.termux.zerocore.llm.model.Config;
+import com.termux.zerocore.llm.model.RequestMessageItem;
 import com.termux.zerocore.ftp.utils.UserSetManage;
 
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public class ChatFragment extends Fragment {
     private ChatDatabaseHelper dbHelper;
     private List<ChatMessage> messages = new ArrayList<>();
     private ChatMessageAdapter adapter;
-    private DeepSeekTransitFragment mDeepSeekTransitFragment;
+    private LLMTransitFragment mLlmTransitFragment;
 
     private String sessionId;
 
@@ -99,8 +99,8 @@ public class ChatFragment extends Fragment {
         this.mIntent = intent;
     }
 
-    public void setDeepSeekTransitFragment(DeepSeekTransitFragment deepSeekTransitFragment) {
-        mDeepSeekTransitFragment = deepSeekTransitFragment;
+    public void setLlmTransitFragment(LLMTransitFragment llmTransitFragment) {
+        mLlmTransitFragment = llmTransitFragment;
     }
 
     private void initView() {
@@ -138,7 +138,7 @@ public class ChatFragment extends Fragment {
             messages.addAll(dbHelper.getMessagesForSession(sessionId));
         }
         mCancel.setOnClickListener(view -> {
-            mDeepSeekTransitFragment.switchFragment(0, null);
+            mLlmTransitFragment.switchFragment(0, null);
             messages.clear();
         });
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -348,7 +348,7 @@ public class ChatFragment extends Fragment {
             currentProvider = AIClient.getProvider("openai");
             currentProfile = new ProviderProfile(0, "DeepSeek", "openai",
                 "https://api.deepseek.com/chat/completions",
-                UserSetManage.Companion.get().getZTUserBean().getDeepSeekApiKey(),
+                UserSetManage.Companion.get().getZTUserBean().getLlmApiKey(),
                 "deepseek-chat", true);
         }
     }
@@ -356,23 +356,23 @@ public class ChatFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mDeepSeekTransitFragment = null;
+        mLlmTransitFragment = null;
         adapter.release();
         chatFragment = null;
     }
 
     // 获取终端助手提示语
     private String getPrompt() {
-        boolean isDeepSeekVisibleTerminal = UserSetManage.Companion.get().getZTUserBean().isIsDeepSeekVisibleTerminal();
+        boolean isLlmVisibleTerminal = UserSetManage.Companion.get().getZTUserBean().isIsLlmVisibleTerminal();
         String customPrompt = UserSetManage.Companion.get().getZTUserBean().getCustomSystemPrompt();
         String basePrompt;
         if (customPrompt != null && !customPrompt.isEmpty()) {
             basePrompt = customPrompt;
         } else {
-            basePrompt = UUtils.getString(R.string.deepseek_zs);
+            basePrompt = UUtils.getString(R.string.llm_zs);
         }
 
-        if (isDeepSeekVisibleTerminal) {
+        if (isLlmVisibleTerminal) {
             String terminalCommands = com.termux.zerocore.utils.SingletonCommunicationUtils.getInstance().getmSingletonCommunicationListener().getTextToTerminal()
                 .replace("$", "")
                 .replace("~", "")
@@ -382,7 +382,7 @@ public class ChatFragment extends Fragment {
                 terminalCommands = terminalCommands.substring(terminalCommands.length() - Config.MAX_VISIBLE);
             }
             LogUtils.e(TAG, "getPrompt: " + terminalCommands);
-            return basePrompt + UUtils.getString(R.string.deepseek_zs_command) + terminalCommands;
+            return basePrompt + UUtils.getString(R.string.llm_zs_command) + terminalCommands;
         } else {
             return basePrompt;
         }

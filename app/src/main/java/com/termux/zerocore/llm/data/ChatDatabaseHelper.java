@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.data;
+package com.termux.zerocore.llm.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -84,8 +84,8 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_MODEL_NAME + " TEXT NOT NULL,"
             + COLUMN_IS_DEFAULT + " INTEGER DEFAULT 0" + ");");
 
-        // Insert default DeepSeek provider
-        insertDefaultDeepSeekProvider(db, "");
+        // Insert default provider
+        insertDefaultProvider(db, "");
     }
 
     @Override
@@ -128,8 +128,8 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         // Migrate existing API key from SharedPreferences (bypass UserSetManage singleton)
         String existingApiKey = readApiKeyFromSharedPrefs();
 
-        // Insert default DeepSeek provider with migrated API key
-        long defaultProviderId = insertDefaultDeepSeekProvider(db, existingApiKey);
+        // Insert default provider with migrated API key
+        long defaultProviderId = insertDefaultProvider(db, existingApiKey);
 
         // Update all existing sessions to use the default provider
         if (defaultProviderId > 0) {
@@ -141,7 +141,7 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Read DeepSeek API key directly from SharedPreferences via SaveData,
+     * Read API key directly from SharedPreferences via SaveData,
      * bypassing UserSetManage singleton to avoid NPE during database upgrade.
      */
     private String readApiKeyFromSharedPrefs() {
@@ -149,8 +149,8 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
             String json = SaveData.INSTANCE.getStringOther("zero_termux_user_bean");
             if (json != null && !json.isEmpty() && !"def".equals(json)) {
                 ZTUserBean bean = new Gson().fromJson(json, ZTUserBean.class);
-                if (bean != null && bean.getDeepSeekApiKey() != null) {
-                    return bean.getDeepSeekApiKey();
+                if (bean != null && bean.getLlmApiKey() != null) {
+                    return bean.getLlmApiKey();
                 }
             }
         } catch (Exception e) {
@@ -160,9 +160,9 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Insert the default DeepSeek provider and return the inserted row ID.
+     * Insert the default provider and return the inserted row ID.
      */
-    private long insertDefaultDeepSeekProvider(SQLiteDatabase db, String apiKey) {
+    private long insertDefaultProvider(SQLiteDatabase db, String apiKey) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROVIDER_NAME, "DeepSeek");
         values.put(COLUMN_FORMAT_TYPE, "openai");

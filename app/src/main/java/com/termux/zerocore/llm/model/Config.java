@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.model;
+package com.termux.zerocore.llm.model;
 
 public class Config {
     // 默认命令行

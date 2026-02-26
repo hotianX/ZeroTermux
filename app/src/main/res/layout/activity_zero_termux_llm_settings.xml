@@ -127,7 +127,7 @@
                             android:textColor="@color/color_ffffff"
                             android:textStyle="bold"
                             android:textSize="15sp"
-                            android:text="@string/deepseek_settings_ai_see"
+                            android:text="@string/llm_settings_ai_see"
                             android:layout_height="wrap_content"/>
 
                         <TextView
@@ -136,7 +136,7 @@
                             android:textColor="@color/md_grey_500"
                             android:textStyle="bold"
                             android:textSize="13sp"
-                            android:text="@string/deepseek_settings_ai_see_summary"
+                            android:text="@string/llm_settings_ai_see_summary"
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
@@ -181,7 +181,7 @@
                             android:textColor="@color/color_ffffff"
                             android:textStyle="bold"
                             android:textSize="15sp"
-                            android:text="@string/deepseek_settings_key"
+                            android:text="@string/llm_settings_key"
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
@@ -204,7 +204,7 @@
                     android:layout_marginRight="10dp">
 
                     <EditText
-                        android:id="@+id/deepseek_edit"
+                        android:id="@+id/llm_api_key_edit"
                         android:layout_width="match_parent"
                         android:textSize="15sp"
                         android:paddingTop="5dp"
@@ -212,7 +212,7 @@
                         android:textColor="@color/white"
                         android:gravity="start"
                         android:textColorHint="@color/md_grey_500"
-                        android:hint="@string/deepseek_settings_key_edit"
+                        android:hint="@string/llm_settings_key_edit"
                         android:background="@null"
                         android:layout_height="80dp"/>
 
@@ -222,13 +222,13 @@
                         android:layout_marginTop="5dp"
                         android:layout_height="20dp"/>
                     <TextView
-                        android:id="@+id/deepseek_key_summary"
+                        android:id="@+id/llm_key_summary"
                         android:layout_width="wrap_content"
                         android:layout_marginTop="10dp"
                         android:textColor="@color/md_grey_500"
                         android:textStyle="bold"
                         android:textSize="13sp"
-                        android:text="@string/deepseek_settings_key_edit_info"
+                        android:text="@string/llm_settings_key_edit_info"
                         android:layout_height="wrap_content"/>
 
                 </LinearLayout>
@@ -260,7 +260,7 @@
                             android:textColor="@color/color_ffffff"
                             android:textStyle="bold"
                             android:textSize="15sp"
-                            android:text="@string/deepseek_settings_send_command"
+                            android:text="@string/llm_settings_send_command"
                             android:layout_height="wrap_content"/>
 
                         <TextView
@@ -269,7 +269,7 @@
                             android:textColor="@color/md_grey_500"
                             android:textStyle="bold"
                             android:textSize="13sp"
-                            android:text="@string/deepseek_settings_send_command_summary"
+                            android:text="@string/llm_settings_send_command_summary"
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
@@ -314,7 +314,7 @@
                             android:textColor="@color/color_ffffff"
                             android:textStyle="bold"
                             android:textSize="15sp"
-                            android:text="@string/deepseek_settings_send_close"
+                            android:text="@string/llm_settings_send_close"
                             android:layout_height="wrap_content"/>
 
                         <TextView
@@ -323,7 +323,7 @@
                             android:textColor="@color/md_grey_500"
                             android:textStyle="bold"
                             android:textSize="13sp"
-                            android:text="@string/deepseek_settings_send_close_summary"
+                            android:text="@string/llm_settings_send_close_summary"
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
@@ -367,7 +367,7 @@
                             android:textColor="@color/color_ffffff"
                             android:textStyle="bold"
                             android:textSize="15sp"
-                            android:text="@string/deepseek_settings_recognition"
+                            android:text="@string/llm_settings_recognition"
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
@@ -398,7 +398,7 @@
                         android:textColor="@color/white"
                         android:gravity="start"
                         android:textColorHint="@color/md_grey_500"
-                        android:hint="@string/deepseek_settings_recognition_edit"
+                        android:hint="@string/llm_settings_recognition_edit"
                         android:background="@null"
                         android:layout_height="200dp"/>
 
@@ -414,7 +414,7 @@
                         android:textColor="@color/md_grey_500"
                         android:textStyle="bold"
                         android:textSize="13sp"
-                        android:text="@string/deepseek_settings_recognition_edit_info"
+                        android:text="@string/llm_settings_recognition_edit_info"
                         android:layout_height="wrap_content"/>
 
                 </LinearLayout>
@@ -446,7 +446,7 @@
                             android:textColor="@color/color_ffffff"
                             android:textStyle="bold"
                             android:textSize="15sp"
-                            android:text="@string/deepseek_settings_url"
+                            android:text="@string/llm_settings_url"
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
@@ -478,7 +478,7 @@
                         android:textColor="@color/white"
                         android:gravity="start"
                         android:textColorHint="@color/md_grey_500"
-                        android:hint="@string/deepseek_settings_key_edit"
+                        android:hint="@string/llm_settings_key_edit"
                         android:background="@null"
                         android:layout_height="80dp"/>
 
@@ -493,7 +493,7 @@
                         android:textColor="@color/md_grey_500"
                         android:textStyle="bold"
                         android:textSize="13sp"
-                        android:text="@string/deepseek_settings_url_edit_info"
+                        android:text="@string/llm_settings_url_edit_info"
                         android:layout_height="wrap_content"/>
 
                 </LinearLayout>

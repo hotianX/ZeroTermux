@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.utils;
+package com.termux.zerocore.llm.utils;
 
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -25,7 +25,7 @@ import com.example.xh_lib.utils.UUtils;
 import com.termux.R;
 import com.termux.app.TermuxActivity;
 import com.termux.zerocore.bean.ZTUserBean;
-import com.termux.zerocore.deepseek.model.Config;
+import com.termux.zerocore.llm.model.Config;
 import com.termux.zerocore.ftp.utils.UserSetManage;
 
 public class SpannableTextUtil {
@@ -180,7 +180,7 @@ public class SpannableTextUtil {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            UUtils.showMsg(UUtils.getString(R.string.deepseek_settings_recognition_error_toast));
+            UUtils.showMsg(UUtils.getString(R.string.llm_settings_recognition_error_toast));
         }
 
         // 检查是否有连续的命令行特征

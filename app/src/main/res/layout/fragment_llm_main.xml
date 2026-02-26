@@ -78,7 +78,7 @@
             android:layout_centerHorizontal="true"
             android:textSize="15sp"
             android:textColor="@color/zfile_white"
-            android:text="@string/deepseek_empty"
+            android:text="@string/llm_empty"
             android:layout_height="wrap_content"/>
     </RelativeLayout>
 

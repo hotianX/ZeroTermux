@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.view;
+package com.termux.zerocore.llm.view;
 
 // CustomTextView.java
 import android.content.Context;
@@ -44,7 +44,7 @@ public class CustomTextView extends AppCompatTextView {
                 menu.clear();
                 // 添加自定义菜单项
                 menu.add(0, 1, 0, UUtils.getString(R.string.action_copy));
-                menu.add(0, 2, 1, UUtils.getString(R.string.deepseek_send_command));
+                menu.add(0, 2, 1, UUtils.getString(R.string.llm_send_command));
                 return true;
             }
 

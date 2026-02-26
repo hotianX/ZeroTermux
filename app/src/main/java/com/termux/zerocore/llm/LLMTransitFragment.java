@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek;
+package com.termux.zerocore.llm;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,22 +16,22 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.xh_lib.utils.LogUtils;
 import com.termux.R;
 
-public class DeepSeekTransitFragment extends Fragment {
-    private static final String TAG = DeepSeekTransitFragment.class.getSimpleName();
+public class LLMTransitFragment extends Fragment {
+    private static final String TAG = LLMTransitFragment.class.getSimpleName();
     private View mView;
     private FrameLayout mFrameLayout;
-    private static DeepSeekTransitFragment deepSeekTransitFragment;
+    private static LLMTransitFragment llmTransitFragment;
 
-    public static DeepSeekTransitFragment newInstance() {
-        if (deepSeekTransitFragment == null) {
-            synchronized (DeepSeekTransitFragment.class) {
-                if (deepSeekTransitFragment == null) {
-                    deepSeekTransitFragment = new DeepSeekTransitFragment();
+    public static LLMTransitFragment newInstance() {
+        if (llmTransitFragment == null) {
+            synchronized (LLMTransitFragment.class) {
+                if (llmTransitFragment == null) {
+                    llmTransitFragment = new LLMTransitFragment();
                 }
-                return deepSeekTransitFragment;
+                return llmTransitFragment;
             }
         } else {
-            return deepSeekTransitFragment;
+            return llmTransitFragment;
         }
     }
 
@@ -57,7 +57,7 @@ public class DeepSeekTransitFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mView = View.inflate(getContext(), R.layout.fragment_transit_deepseek, null);
+        mView = View.inflate(getContext(), R.layout.fragment_transit_llm, null);
         initView();
         return mView;
     }
@@ -70,15 +70,15 @@ public class DeepSeekTransitFragment extends Fragment {
         FragmentTransaction fragmentTransaction = this.getChildFragmentManager().beginTransaction();
         switch (index) {
             case 0:
-                DeepSeekMainFragment deepSeekMainFragment = DeepSeekMainFragment.newInstance();
-                deepSeekMainFragment.setDeepSeekTransitFragment(this);
-                fragmentTransaction.replace(R.id.frame_layout, deepSeekMainFragment, "DeepSeekMainFragment")
+                LLMMainFragment llmMainFragment = LLMMainFragment.newInstance();
+                llmMainFragment.setLLMTransitFragment(this);
+                fragmentTransaction.replace(R.id.frame_layout, llmMainFragment, "LLMMainFragment")
                     .commitAllowingStateLoss();
                 break;
             case 1:
                 ChatFragment chatFragment = ChatFragment.newInstance();
                 chatFragment.setIntent(intent);
-                chatFragment.setDeepSeekTransitFragment(this);
+                chatFragment.setLLMTransitFragment(this);
                 fragmentTransaction.replace(R.id.frame_layout, ChatFragment.newInstance(), "ChatFragment")
                     .commitAllowingStateLoss();
                 break;
@@ -88,6 +88,6 @@ public class DeepSeekTransitFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        deepSeekTransitFragment = null;
+        llmTransitFragment = null;
     }
 }

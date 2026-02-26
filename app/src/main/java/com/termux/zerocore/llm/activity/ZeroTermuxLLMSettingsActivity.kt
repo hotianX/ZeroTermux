@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek.activity
+package com.termux.zerocore.llm.activity
 
 import android.content.Intent
 import android.graphics.Color
@@ -27,8 +27,8 @@ import androidx.cardview.widget.CardView
 import com.example.xh_lib.utils.UUtils
 import com.termux.R
 import com.termux.zerocore.ai.model.ProviderProfile
-import com.termux.zerocore.deepseek.data.ChatDatabaseHelper
-import com.termux.zerocore.deepseek.model.Config
+import com.termux.zerocore.llm.data.ChatDatabaseHelper
+import com.termux.zerocore.llm.model.Config
 import com.termux.zerocore.ftp.utils.UserSetManage
 import com.termux.zerocore.url.FileUrl
 import com.termux.zerocore.utils.FileHttpUtils.Companion.get
@@ -36,15 +36,15 @@ import com.topjohnwu.superuser.Shell
 import com.zp.z_file.util.LogUtils
 import java.io.File
 
-class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
+class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
     companion object {
-        public val TAG = ZeroTermuxDeepSeekSettingsActivity::class.java.simpleName
+        public val TAG = ZeroTermuxLLMSettingsActivity::class.java.simpleName
     }
 
     private val mKeyClick by lazy { findViewById<EditText>(R.id.key_click) }
-    private val mDeepSeekEdit by lazy { findViewById<EditText>(R.id.deepseek_edit) }
+    private val mLlmApiKeyEdit by lazy { findViewById<EditText>(R.id.llm_api_key_edit) }
     private val mKeyClickSummary by lazy { findViewById<TextView>(R.id.key_click_summary) }
-    private val mDeepSeekKeySummary by lazy { findViewById<TextView>(R.id.deepseek_key_summary) }
+    private val mLlmKeySummary by lazy { findViewById<TextView>(R.id.llm_key_summary) }
 
     private val mAiVisibleSwitch by lazy { findViewById<SwitchCompat>(R.id.ai_visible_switch) }
     private val mAiVisibleLayout by lazy { findViewById<LinearLayout>(R.id.ai_visible_layout) }
@@ -65,7 +65,7 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_zero_termux_deep_seek_settings)
+        setContentView(R.layout.activity_zero_termux_llm_settings)
         dbHelper = ChatDatabaseHelper(this)
         initView()
         initStatus()
@@ -76,7 +76,7 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
     private fun initView() {
          setSwitchStatus(mAiVisibleSwitch, mAiVisibleLayout)
 
-        // 设置DeepSeek蓝色点击识别
+        // 设置AI蓝色点击识别
         val commandLink = UserSetManage.get().getZTUserBean().commandLink
         if (commandLink.isNullOrEmpty()) {
             mKeyClick.setText(Config.COMMANDS)
@@ -118,11 +118,11 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
         })
 
         // 设置 DeepSeep Key
-        val deepSeekApiKey = UserSetManage.get().getZTUserBean().deepSeekApiKey
-        if (!TextUtils.isEmpty(deepSeekApiKey)) {
-            mDeepSeekEdit.setText(deepSeekApiKey)
+        val llmApiKey = UserSetManage.get().getZTUserBean().llmApiKey
+        if (!TextUtils.isEmpty(llmApiKey)) {
+            mLlmApiKeyEdit.setText(llmApiKey)
         }
-       mDeepSeekEdit.addTextChangedListener(object : TextWatcher {
+       mLlmApiKeyEdit.addTextChangedListener(object : TextWatcher {
            override fun beforeTextChanged(
                p0: CharSequence?,
                p1: Int,
@@ -137,8 +137,8 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
                p3: Int
            ) {
                val ztUserBean = UserSetManage.get().getZTUserBean()
-               var deepSeekApiKey = p0?.toString()
-               ztUserBean.deepSeekApiKey = deepSeekApiKey
+               var llmApiKey = p0?.toString()
+               ztUserBean.llmApiKey = llmApiKey
                UserSetManage.get().setZTUserBean(ztUserBean)
            }
            override fun afterTextChanged(p0: Editable?) {
@@ -153,22 +153,22 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
 
     private fun initStatus() {
         val ztUserBean = UserSetManage.get().getZTUserBean()
-        mAiVisibleSwitch.isChecked = ztUserBean.isIsDeepSeekVisibleTerminal
+        mAiVisibleSwitch.isChecked = ztUserBean.isIsLlmVisibleTerminal
 
-        mKeyClickSummary.text = getKeyClickText(UUtils.getString(R.string.deepseek_settings_recognition_edit_keyword),
-            UUtils.getString(R.string.deepseek_settings_recognition_edit_info), object : ClickableSpan() {
+        mKeyClickSummary.text = getKeyClickText(UUtils.getString(R.string.llm_settings_recognition_edit_keyword),
+            UUtils.getString(R.string.llm_settings_recognition_edit_info), object : ClickableSpan() {
             override fun onClick(widget: View) {
                 mKeyClick.setText(Config.COMMANDS)
             }
         })
 
-        mDeepSeekKeySummary.text = getKeyClickText(UUtils.getString(R.string.deepseek_settings_key_edit_info_keyword),
-            UUtils.getString(R.string.deepseek_settings_key_edit_info), object : ClickableSpan() {
+        mLlmKeySummary.text = getKeyClickText(UUtils.getString(R.string.llm_settings_key_edit_info_keyword),
+            UUtils.getString(R.string.llm_settings_key_edit_info), object : ClickableSpan() {
                 override fun onClick(widget: View) {
-                    startActivity(Intent(this@ZeroTermuxDeepSeekSettingsActivity, ZeroTermuxDeepSeekKeyActivity::class.java))
+                    startActivity(Intent(this@ZeroTermuxLLMSettingsActivity, ZeroTermuxLLMKeyActivity::class.java))
                 }
             })
-        mDeepSeekKeySummary.movementMethod = LinkMovementMethod.getInstance()
+        mLlmKeySummary.movementMethod = LinkMovementMethod.getInstance()
         mKeyClickSummary.movementMethod = LinkMovementMethod.getInstance()
     }
 
@@ -339,7 +339,7 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
         if (!customPrompt.isNullOrEmpty()) {
             mSystemPromptEdit.setText(customPrompt)
         } else {
-            mSystemPromptEdit.setText(UUtils.getString(R.string.deepseek_zs))
+            mSystemPromptEdit.setText(UUtils.getString(R.string.llm_zs))
         }
 
         mSystemPromptEdit.addTextChangedListener(object : TextWatcher {
@@ -382,7 +382,7 @@ class ZeroTermuxDeepSeekSettingsActivity : AppCompatActivity() {
             val ztUserBean = UserSetManage.get().getZTUserBean()
             when (switchCompat) {
                 mAiVisibleSwitch -> {
-                     ztUserBean.isIsDeepSeekVisibleTerminal = switchCompat.isChecked
+                     ztUserBean.isIsLlmVisibleTerminal = switchCompat.isChecked
                  }
 
             }

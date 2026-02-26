@@ -2,7 +2,7 @@ package com.termux.zerocore.ai.provider;
 
 import com.termux.zerocore.ai.model.AIProviderException;
 import com.termux.zerocore.ai.model.ProviderProfile;
-import com.termux.zerocore.deepseek.model.RequestMessageItem;
+import com.termux.zerocore.llm.model.RequestMessageItem;
 
 import java.util.List;
 

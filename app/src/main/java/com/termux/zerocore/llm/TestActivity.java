@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek;
+package com.termux.zerocore.llm;
 
 
 import android.os.Bundle;
@@ -7,24 +7,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.gson.Gson;
 import com.termux.R;
-import com.termux.zerocore.deepseek.data.ChatDatabaseHelper;
-import com.termux.zerocore.deepseek.model.Config;
-import com.termux.zerocore.deepseek.model.DeepSeekClient;
-import com.termux.zerocore.deepseek.model.RequestMessageItem;
+import com.termux.zerocore.ai.model.AIClient;
+import com.termux.zerocore.ai.model.ProviderProfile;
+import com.termux.zerocore.ai.provider.AIProvider;
+import com.termux.zerocore.llm.data.ChatDatabaseHelper;
+import com.termux.zerocore.llm.model.RequestMessageItem;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class TestActivity extends AppCompatActivity {
     private EditText messageInput;
     private Button sendButton;
     private ChatDatabaseHelper dbHelper;
 
-
-    private DeepSeekClient deepSeekClient = new DeepSeekClient();
+    private AIClient aiClient = new AIClient();
     private List<RequestMessageItem> requestMessageItemList = new ArrayList<>();
 
     private TextView testText;
@@ -36,11 +34,9 @@ public class TestActivity extends AppCompatActivity {
 
         dbHelper = new ChatDatabaseHelper(this);
 
-
         messageInput = findViewById(R.id.messageInput);
         sendButton = findViewById(R.id.sendButton);
         testText = findViewById(R.id.testText);
-
 
         sendButton.setOnClickListener(v -> sendMessage());
     }
@@ -56,34 +52,37 @@ public class TestActivity extends AppCompatActivity {
         }
     }
 
-    private void reqModel(String text){
+    private void reqModel(String text) {
         requestMessageItemList.add(new RequestMessageItem("user", text));
 
-        deepSeekClient.ask(requestMessageItemList, true, new DeepSeekClient.Lis() {
+        ProviderProfile defaultProfile = dbHelper.getDefaultProvider();
+        if (defaultProfile == null) {
+            defaultProfile = new ProviderProfile(0, "DeepSeek", "openai",
+                "https://api.deepseek.com/chat/completions", "", "deepseek-chat", true);
+        }
+        AIProvider provider = AIClient.getProvider(defaultProfile.getFormatType());
+
+        aiClient.ask(provider, defaultProfile, requestMessageItemList, "", new AIClient.Listener() {
             @Override
-            public void error() {
-                System.out.println("\n处理失败（服务器响应超时）");
-                input();
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> testText.append("\nError: " + errorMessage));
+                resetInput();
             }
 
             @Override
-            public void msg(String msg, boolean isError) {
-                System.out.print(deepSeekClient.getMsg(msg));
-                runOnUiThread(()->{
-                    testText.append(deepSeekClient.getMsg(msg));
-                });
+            public void onMessage(String content) {
+                runOnUiThread(() -> testText.append(content));
             }
 
             @Override
-            public void end() {
-                System.out.print("\n");
-                input();
+            public void onComplete() {
+                resetInput();
             }
         });
     }
 
-    private void input(){
-        runOnUiThread(()->{
+    private void resetInput() {
+        runOnUiThread(() -> {
             sendButton.setText("发送");
             sendButton.setEnabled(true);
         });

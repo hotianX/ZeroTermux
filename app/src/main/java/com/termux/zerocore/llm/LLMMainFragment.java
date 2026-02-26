@@ -1,4 +1,4 @@
-package com.termux.zerocore.deepseek;
+package com.termux.zerocore.llm;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -17,16 +17,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.termux.R;
-import com.termux.zerocore.deepseek.activity.ZeroTermuxDeepSeekSettingsActivity;
-import com.termux.zerocore.deepseek.data.ChatDatabaseHelper;
-import com.termux.zerocore.deepseek.data.ChatSession;
-import com.termux.zerocore.deepseek.data.ChatSessionAdapter;
+import com.termux.zerocore.llm.activity.ZeroTermuxLLMSettingsActivity;
+import com.termux.zerocore.llm.data.ChatDatabaseHelper;
+import com.termux.zerocore.llm.data.ChatSession;
+import com.termux.zerocore.llm.data.ChatSessionAdapter;
 
 import java.util.Collections;
 import java.util.List;
 
-public class DeepSeekMainFragment extends Fragment {
-    private static DeepSeekMainFragment deepSeekMainFragment;
+public class LLMMainFragment extends Fragment {
+    private static LLMMainFragment llmMainFragment;
     private RecyclerView mRecyclerView;
     private ChatSessionAdapter adapter;
     private ChatDatabaseHelper dbHelper;
@@ -34,25 +34,25 @@ public class DeepSeekMainFragment extends Fragment {
     private TextView mChatEmpty;
     private ImageView mAddImageView;
     private ImageView mSettingsImageView;
-    private DeepSeekTransitFragment mDeepSeekTransitFragment;
+    private LLMTransitFragment mLlmTransitFragment;
 
-    public static DeepSeekMainFragment newInstance() {
-        if (deepSeekMainFragment == null) {
-            synchronized (DeepSeekMainFragment.class) {
-                if (deepSeekMainFragment == null) {
-                    deepSeekMainFragment = new DeepSeekMainFragment();
+    public static LLMMainFragment newInstance() {
+        if (llmMainFragment == null) {
+            synchronized (LLMMainFragment.class) {
+                if (llmMainFragment == null) {
+                    llmMainFragment = new LLMMainFragment();
                 }
-                return deepSeekMainFragment;
+                return llmMainFragment;
             }
         } else {
-            return deepSeekMainFragment;
+            return llmMainFragment;
         }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mView = View.inflate(getContext(), R.layout.fragment_deepseek_main, null);
+        mView = View.inflate(getContext(), R.layout.fragment_llm_main, null);
         initView();
         return mView;
     }
@@ -74,32 +74,32 @@ public class DeepSeekMainFragment extends Fragment {
             mRecyclerView.setVisibility(View.VISIBLE);
         }
         mSettingsImageView.setOnClickListener(view -> {
-            getContext().startActivity(new Intent(getContext(), ZeroTermuxDeepSeekSettingsActivity.class));
+            getContext().startActivity(new Intent(getContext(), ZeroTermuxLLMSettingsActivity.class));
         });
     }
 
-    public void setDeepSeekTransitFragment(DeepSeekTransitFragment deepSeekTransitFragment) {
-        mDeepSeekTransitFragment = deepSeekTransitFragment;
+    public void setLlmTransitFragment(LLMTransitFragment llmTransitFragment) {
+        mLlmTransitFragment = llmTransitFragment;
     }
 
     private void startNewChat() {
         Intent intent = new Intent();
         intent.putExtra("isNew", true);
         intent.putExtra("createdAt", System.currentTimeMillis()); // 添加当前时间戳
-        mDeepSeekTransitFragment.switchFragment(1, intent);
+        mLlmTransitFragment.switchFragment(1, intent);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        adapter = new ChatSessionAdapter(getContext(), dbHelper.getAllSessions(), mDeepSeekTransitFragment);
+        adapter = new ChatSessionAdapter(getContext(), dbHelper.getAllSessions(), mLlmTransitFragment);
         mRecyclerView.setAdapter(adapter);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mDeepSeekTransitFragment = null;
+        mLlmTransitFragment = null;
         adapter.release();
     }
 }

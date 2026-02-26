@@ -42,7 +42,7 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_centerVertical="true"
-                    android:src="@mipmap/deepseek_cancel" />
+                    android:src="@mipmap/llm_cancel" />
             </RelativeLayout>
 
 
