@@ -71,14 +71,14 @@ public class LLMTransitFragment extends Fragment {
         switch (index) {
             case 0:
                 LLMMainFragment llmMainFragment = LLMMainFragment.newInstance();
-                llmMainFragment.setLLMTransitFragment(this);
+                llmMainFragment.setLlmTransitFragment(this);
                 fragmentTransaction.replace(R.id.frame_layout, llmMainFragment, "LLMMainFragment")
                     .commitAllowingStateLoss();
                 break;
             case 1:
                 ChatFragment chatFragment = ChatFragment.newInstance();
                 chatFragment.setIntent(intent);
-                chatFragment.setLLMTransitFragment(this);
+                chatFragment.setLlmTransitFragment(this);
                 fragmentTransaction.replace(R.id.frame_layout, ChatFragment.newInstance(), "ChatFragment")
                     .commitAllowingStateLoss();
                 break;
