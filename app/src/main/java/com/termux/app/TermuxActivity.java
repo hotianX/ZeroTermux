@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -1241,6 +1242,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
     private FrameLayout frame_file;
     private RelativeLayout session_rl;
     private RecyclerView mMainMenuList;
+    private Button mKeyBordButton;
 	private SlidingConsumer mSlidingConsumer;
     private View mLayoutMenuAll;
     private View mIncludeRightMenu;
@@ -1275,11 +1277,15 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         error_msg = findViewById(R.id.error_msg);
         data_info_card = findViewById(R.id.data_info_card);
         data_info_content = findViewById(R.id.data_info_content);
+        mKeyBordButton = findViewById(R.id.key_bord_button);
         back_color = mTermuxActivityRootView.getBack_color();
         back_img = mTermuxActivityRootView.getBack_img();
         back_video = mTermuxActivityRootView.getBack_video();
         mMainActivity = mTermuxActivityRootView.getMainActivity();
         qq_group_tv.setOnClickListener(this);
+        mKeyBordButton.setOnClickListener(v -> {
+            showKeyBord();
+        });
         zt_new.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.setData(Uri.parse(ZTConstantConfig.URL.ZT_GITHUB_URL));//Url 就是你要打开的网址
@@ -1321,6 +1327,11 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         setEgInstallStatus();
     }
 
+    private void showKeyBord() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+        getDrawer().smoothClose();
+    }
     // 读取数据包信息
     public void initDataMsgInfo() {
         String dataMessageFileString = FileIOUtils.INSTANCE.getDataMessageFileString();
@@ -1523,9 +1534,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
 
         });
         boomWindow[0].popu_windows_jianpan.setOnClickListener(v -> {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-            getDrawer().smoothClose();
+            showKeyBord();
             popupWindow[0].dismiss();
         });
     }
