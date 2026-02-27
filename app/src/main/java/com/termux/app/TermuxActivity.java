@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -1240,10 +1241,13 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
     private MainActivity mMainActivity;
     private FrameLayout frame_file;
     private RelativeLayout session_rl;
+    private RelativeLayout mGuideLayout;
     private RecyclerView mMainMenuList;
+    private Button mKeyBordButton;
 	private SlidingConsumer mSlidingConsumer;
     private View mLayoutMenuAll;
     private View mIncludeRightMenu;
+    private TextView mGuideContent;
     LocalBroadcastManager localBroadcastManager;
     LocalReceiver localReceiver;
 
@@ -1275,11 +1279,17 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         error_msg = findViewById(R.id.error_msg);
         data_info_card = findViewById(R.id.data_info_card);
         data_info_content = findViewById(R.id.data_info_content);
+        mKeyBordButton = findViewById(R.id.key_bord_button);
+        mGuideLayout = findViewById(R.id.guide_layout);
+        mGuideContent = findViewById(R.id.guide_content);
         back_color = mTermuxActivityRootView.getBack_color();
         back_img = mTermuxActivityRootView.getBack_img();
         back_video = mTermuxActivityRootView.getBack_video();
         mMainActivity = mTermuxActivityRootView.getMainActivity();
         qq_group_tv.setOnClickListener(this);
+        mKeyBordButton.setOnClickListener(v -> {
+            showKeyBord();
+        });
         zt_new.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.setData(Uri.parse(ZTConstantConfig.URL.ZT_GITHUB_URL));//Url 就是你要打开的网址
@@ -1317,10 +1327,26 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 open_image.setRotation(0);
             }
         });
+        boolean hideGuideLayout = UserSetManage.Companion.get().getZTUserBean().isHideGuideLayout();
+        if (hideGuideLayout) {
+            mGuideLayout.setVisibility(View.GONE);
+        }
+        mGuideContent.setOnLongClickListener(v -> {
+            mGuideLayout.setVisibility(View.GONE);
+            ZTUserBean ztUserBean = UserSetManage.Companion.get().getZTUserBean();
+            ztUserBean.setHideGuideLayout(true);
+            UserSetManage.Companion.get().setZTUserBean(ztUserBean);
+            return true;
+        });
         initDataMsgInfo();
         setEgInstallStatus();
     }
 
+    private void showKeyBord() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+        getDrawer().smoothClose();
+    }
     // 读取数据包信息
     public void initDataMsgInfo() {
         String dataMessageFileString = FileIOUtils.INSTANCE.getDataMessageFileString();
@@ -1523,9 +1549,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
 
         });
         boomWindow[0].popu_windows_jianpan.setOnClickListener(v -> {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-            getDrawer().smoothClose();
+            showKeyBord();
             popupWindow[0].dismiss();
         });
     }
@@ -1926,6 +1950,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
     }
 
     private void initMenu() {
+        writerMainMenuConfig(false);
         ZTUserBean ztUserBean = UserSetManage.Companion.get().getZTUserBean();
         if (ztUserBean.isDisableMainConfigMenu()) {
             initListMenu(MainMenuConfig.getMainMenuCategoryDatas());
@@ -1936,15 +1961,24 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
 
     private void writerMainMenuConfig(boolean cover) {
         File mainMenuXmlPathFile = FileIOUtils.INSTANCE.getMainMenuXmlPathFile();
+        Locale systemLocale = getResources().getConfiguration().locale;
+        String language = systemLocale.getLanguage();
+        String targetLang = (!TextUtils.isEmpty(language) && language.equals("en")) ? "en" : "cn";
+
         if (!mainMenuXmlPathFile.exists() || cover) {
-            Locale systemLocale = Locale.getDefault();
-            String language = systemLocale.getLanguage();
-            Log.i(TAG, "writerMainMenuConfig language: " + language);
-            Log.i(TAG, "writerMainMenuConfig language.equals(\"en\"): " + language.equals("en"));
-            if (!TextUtils.isEmpty(language) && language.equals("en")) {
+            Log.i(TAG, "writerMainMenuConfig create new file for language: " + targetLang);
+            if ("en".equals(targetLang)) {
                 UUtils.writerFile("mainmenu/en/zt_menu_config.xml", mainMenuXmlPathFile);
             } else {
                 UUtils.writerFile("mainmenu/cn/zt_menu_config.xml", mainMenuXmlPathFile);
+            }
+        } else {
+            Log.i(TAG, "writerMainMenuConfig smart update for language: " + targetLang);
+            try {
+                com.termux.zerocore.utils.XMLMergeUtils.smartUpdateMenuLanguage(this, targetLang);
+            } catch (Throwable e) {
+                Log.e(TAG, "Critical Error: XMLMergeUtils failed!", e);
+                e.printStackTrace();
             }
         }
     }
@@ -2288,6 +2322,12 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
             public void onSwipeOpened(SmartSwipeWrapper wrapper, SwipeConsumer consumer, int direction) {
                 super.onSwipeOpened(wrapper, consumer, direction);
                 mTerminalView.clearFocus();
+                if (!UserSetManage.Companion.get().getZTUserBean().isHideGuideLayout()) {
+                    mGuideLayout.setVisibility(View.GONE);
+                    ZTUserBean ztUserBean = UserSetManage.Companion.get().getZTUserBean();
+                    ztUserBean.setHideGuideLayout(true);
+                    UserSetManage.Companion.get().setZTUserBean(ztUserBean);
+                }
             }
 
             @Override
@@ -2558,9 +2598,11 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
             localBroadcastManager.unregisterReceiver(localReceiver);
             localBroadcastManager.unregisterReceiver(messageReceiver);
         }
-        if (mMainMenuAdapter != null) {
-            mMainMenuAdapter.release();
+        MainMenuAdapter adapter = mMainMenuAdapter;
+        if (adapter != null) {
+            adapter.release();
         }
+        mMainMenuAdapter = null;
         VideoUtils.getInstance().onDestroy();
         if (mInternalPassage && mMainActivity != null) {
             mMainActivity.onDestroy(this);

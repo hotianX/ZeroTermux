@@ -69,6 +69,7 @@
                         android:layout_alignParentBottom="true"
                         android:orientation="vertical"
                         android:layout_height="wrap_content"/>
+                    <include layout="@layout/guide_layout"/>
                 </RelativeLayout>
             </RelativeLayout>
             <androidx.viewpager.widget.ViewPager

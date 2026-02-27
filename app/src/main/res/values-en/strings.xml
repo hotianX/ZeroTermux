@@ -1307,4 +1307,14 @@ cd ~ &amp;&amp; pkg update -y \n
     <string name="zt_xml_menu_error">XML format is incorrect. Please modify and retry using the command:\nzt menu update\nOr use the command:\nzt menu update\nto reset.\n\n-Click this error message to directly open the editor-\n\nError details:\n\n</string>
     <string name="zt_xml_settings_title">Disable Using Configuration File for Left Menu Settings</string>
     <string name="zt_xml_settings_summary">(Requires APP restart) Enabling this option will prevent loading the XML configuration file as the data source for the left menu.</string>
+
+    <string name="zt_usage_habits_title">Usage Habits</string>
+    <string name="zt_usage_habits_content">Note (Usage habit related options can be re-customized in ZT settings)\n
+        Choose a usage habit\n
+        termux (Buttons follow the native layout completely)\n
+        ZeroTermux (Buttons follow the ZT layout completely)\n
+        Please select a usage habit</string>
+    <string name="zt_usage_habits_termux">Termux usage habit set successfully. Please go to settings to change the configuration.</string>
+    <string name="zt_usage_habits_ztermux">ZeroTermux usage habit set successfully. Please go to settings to change the configuration.</string>
+    <string name="zt_guide">Double-tap the edge of the screen to bring up the left/right menu bar\nIf you have set the ZT usage habit, use the Volume +\- keys\nIf the left/right sidebar cannot close this window\nLong press here to force close</string>
 </resources>
