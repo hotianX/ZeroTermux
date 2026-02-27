@@ -1241,4 +1241,5 @@
         请选择一个使用习惯</string>
     <string name="zt_usage_habits_termux">设置成功Termux使用习惯,更改配置请到设置</string>
     <string name="zt_usage_habits_ztermux">设置成功ZeroTermux使用习惯,更改配置请到设置</string>
+    <string name="zt_guide">双击屏幕边缘弹出左/右菜单栏\n如果你设置了ZT使用习惯,则为音量+-键\n如果打开左/右侧栏无法关闭此窗口\n长按此处强制关闭</string>
 </resources>

@@ -1241,11 +1241,13 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
     private MainActivity mMainActivity;
     private FrameLayout frame_file;
     private RelativeLayout session_rl;
+    private RelativeLayout mGuideLayout;
     private RecyclerView mMainMenuList;
     private Button mKeyBordButton;
 	private SlidingConsumer mSlidingConsumer;
     private View mLayoutMenuAll;
     private View mIncludeRightMenu;
+    private TextView mGuideContent;
     LocalBroadcastManager localBroadcastManager;
     LocalReceiver localReceiver;
 
@@ -1278,6 +1280,8 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         data_info_card = findViewById(R.id.data_info_card);
         data_info_content = findViewById(R.id.data_info_content);
         mKeyBordButton = findViewById(R.id.key_bord_button);
+        mGuideLayout = findViewById(R.id.guide_layout);
+        mGuideContent = findViewById(R.id.guide_content);
         back_color = mTermuxActivityRootView.getBack_color();
         back_img = mTermuxActivityRootView.getBack_img();
         back_video = mTermuxActivityRootView.getBack_video();
@@ -1322,6 +1326,17 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 info_card.setVisibility(View.GONE);
                 open_image.setRotation(0);
             }
+        });
+        boolean hideGuideLayout = UserSetManage.Companion.get().getZTUserBean().isHideGuideLayout();
+        if (hideGuideLayout) {
+            mGuideLayout.setVisibility(View.GONE);
+        }
+        mGuideContent.setOnLongClickListener(v -> {
+            mGuideLayout.setVisibility(View.GONE);
+            ZTUserBean ztUserBean = UserSetManage.Companion.get().getZTUserBean();
+            ztUserBean.setHideGuideLayout(true);
+            UserSetManage.Companion.get().setZTUserBean(ztUserBean);
+            return true;
         });
         initDataMsgInfo();
         setEgInstallStatus();
@@ -2297,6 +2312,12 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
             public void onSwipeOpened(SmartSwipeWrapper wrapper, SwipeConsumer consumer, int direction) {
                 super.onSwipeOpened(wrapper, consumer, direction);
                 mTerminalView.clearFocus();
+                if (!UserSetManage.Companion.get().getZTUserBean().isHideGuideLayout()) {
+                    mGuideLayout.setVisibility(View.GONE);
+                    ZTUserBean ztUserBean = UserSetManage.Companion.get().getZTUserBean();
+                    ztUserBean.setHideGuideLayout(true);
+                    UserSetManage.Companion.get().setZTUserBean(ztUserBean);
+                }
             }
 
             @Override
