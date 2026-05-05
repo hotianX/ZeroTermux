@@ -23,6 +23,7 @@ local.properties
 .signing/
 
 # Intellij
+.agents/
 .idea/
 *.iml
 

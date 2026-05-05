@@ -212,6 +212,7 @@ android {
             minifyEnabled true
             shrinkResources false // Reproducible builds
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
 
         debug {
@@ -417,5 +418,10 @@ task downloadBootstraps() {
 afterEvaluate {
     android.applicationVariants.all { variant ->
         variant.javaCompileProvider.get().dependsOn(downloadBootstraps)
+    }
+    // Ensure bootstrap zips are downloaded before the NDK native build,
+    // since the NDK build task may run before Java compilation.
+    tasks.matching { it.name.startsWith("buildNdkBuild") }.configureEach {
+        it.dependsOn(downloadBootstraps)
     }
 }
