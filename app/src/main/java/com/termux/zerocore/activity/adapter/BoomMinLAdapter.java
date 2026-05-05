@@ -3,6 +3,7 @@ package com.termux.zerocore.activity.adapter;
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +17,7 @@ import com.termux.zerocore.bean.MinLBean;
 import com.termux.zerocore.dialog.MingLShowDialog;
 import com.termux.zerocore.dialog.MinglingDialog;
 import com.termux.zerocore.utils.SaveData;
+import com.termux.zerocore.utils.SingletonCommunicationUtils;
 
 import java.util.List;
 
@@ -75,18 +77,20 @@ public class BoomMinLAdapter extends RecyclerView.Adapter<MinLViewHolder> {
         });
 
 
-        minLViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mCloseLiftListener!= null){
-                    mCloseLiftListener.close();
-                }
+        minLViewHolder.itemView.setOnClickListener(v -> {
+            if(mCloseLiftListener!= null){
+                mCloseLiftListener.close();
+            }
+            SingletonCommunicationUtils.SingletonCommunicationListener singletonCommunicationListener =
+                SingletonCommunicationUtils.getInstance().getmSingletonCommunicationListener();
+            if (singletonCommunicationListener != null) {
                 if(dataNum.get(position).isChecked){
-                    com.termux.zerocore.utils.SingletonCommunicationUtils.getInstance().getmSingletonCommunicationListener().sendTextToTerminal(dataNum.get(position).value + " \n");
+                    singletonCommunicationListener.sendTextToTerminal(dataNum.get(position).value + " \n");
                 }else{
-                    com.termux.zerocore.utils.SingletonCommunicationUtils.getInstance().getmSingletonCommunicationListener().sendTextToTerminal(dataNum.get(position).value );
+                    singletonCommunicationListener.sendTextToTerminal(dataNum.get(position).value );
                 }
-
+            } else {
+                UUtils.showMsg(UUtils.getString(R.string.zt_core_date_error));
             }
         });
 

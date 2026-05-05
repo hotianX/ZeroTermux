@@ -1,9 +1,11 @@
 package com.termux.filepicker
 
+import android.content.Intent
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageView
@@ -19,6 +21,11 @@ import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.termux.R
 import com.termux.app.TermuxInstaller
+import com.termux.shared.android.PackageUtils
+import com.termux.shared.logger.Logger
+import com.termux.shared.termux.TermuxConstants
+import com.termux.shared.termux.TermuxConstants.TERMUX_APP
+import com.termux.shared.termux.settings.properties.TermuxAppSharedProperties
 import com.termux.zerocore.utils.FileIOUtils
 import com.zp.z_file.bean.DataBean
 import com.zp.z_file.ui.dialog.InstallModuleDialog
@@ -40,20 +47,99 @@ class TermuxFileReceiverActivity : ComponentActivity() {
     private val image_view: ImageView by lazy { findViewById(R.id.image_view) }
     private val pro: ProgressBar by lazy { findViewById(R.id.pro) }
     private var mFile: File? = null
+    private var incomingFileName: String? = null
 
+    companion object {
+        private const val LOG_TAG = "TermuxFileReceiverActivity"
+
+        @JvmStatic
+        fun updateReceiverComponentsState(context: Context) {
+            Thread {
+                val properties = TermuxAppSharedProperties.getProperties() ?: return@Thread
+
+                var errorMessage: String?
+
+                val shareState = !properties.isFileShareReceiverDisabled()
+                Logger.logVerbose(LOG_TAG, "Setting ${TERMUX_APP.FILE_SHARE_RECEIVER_ACTIVITY_CLASS_NAME} component state to $shareState")
+                errorMessage = PackageUtils.setComponentState(
+                    context,
+                    TermuxConstants.TERMUX_PACKAGE_NAME,
+                    TERMUX_APP.FILE_SHARE_RECEIVER_ACTIVITY_CLASS_NAME,
+                    shareState,
+                    null,
+                    false,
+                    false
+                )
+                if (errorMessage != null) {
+                    Logger.logError(LOG_TAG, errorMessage)
+                }
+
+                val viewState = !properties.isFileViewReceiverDisabled()
+                Logger.logVerbose(LOG_TAG, "Setting ${TERMUX_APP.FILE_VIEW_RECEIVER_ACTIVITY_CLASS_NAME} component state to $viewState")
+                errorMessage = PackageUtils.setComponentState(
+                    context,
+                    TermuxConstants.TERMUX_PACKAGE_NAME,
+                    TERMUX_APP.FILE_VIEW_RECEIVER_ACTIVITY_CLASS_NAME,
+                    viewState,
+                    null,
+                    false,
+                    false
+                )
+                if (errorMessage != null) {
+                    Logger.logError(LOG_TAG, errorMessage)
+                }
+            }.start()
+        }
+    }
+
+    private fun resolveIncomingUri(): Uri? {
+        val intent = intent ?: return null
+        return if (Intent.ACTION_SEND == intent.action) {
+            intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM) ?: intent.data
+        } else {
+            intent.data
+        }
+    }
+
+    private fun resolveIncomingDisplayName(uri: Uri?): String? {
+        if (uri == null) return null
+        try {
+            contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                val fileNameColumnId = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (fileNameColumnId >= 0 && cursor.moveToFirst()) {
+                    return cursor.getString(fileNameColumnId)
+                }
+            }
+        } catch (e: Exception) {
+            LogUtils.d(TAG, "resolveIncomingDisplayName error: $e")
+        }
+        return uri.lastPathSegment
+    }
+
+    private fun resolveEffectiveFileName(displayName: String?, file: File): String {
+        val normalizedDisplayName = displayName?.let { File(it).name }?.takeIf { it.isNotBlank() }
+        return normalizedDisplayName ?: file.name
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_termux_file_receiver)
         try {
-            val realPathFromURI = UUtils.getFileAbsolutePath(this, intent?.data)
+            val incomingUri = resolveIncomingUri()
+            val realPathFromURI = UUtils.getFileAbsolutePath(this, incomingUri)
+            if (realPathFromURI.isNullOrEmpty()) {
+                UUtils.showMsg(UUtils.getString(R.string.copy_uri_error))
+                finish()
+                return
+            }
             realPathFromURI.let {
                 mFile = File(it)
-                /*        if (FileIOUtils.isPacketFormat(mFile!!.name)) {
-                            install_data.visibility = View.VISIBLE
-                        } else {
-                            install_data.visibility = View.GONE
-                        }*/
+                incomingFileName = resolveEffectiveFileName(resolveIncomingDisplayName(incomingUri), mFile!!)
+                if (FileIOUtils.isPacketFormat(mFile!!.name)) {
+                    install_data.visibility = View.VISIBLE
+                } else {
+                    install_data.visibility = View.GONE
+                }
 
                 if (FileIOUtils.isModuleFormat(mFile!!.name)) {
                     install_module.visibility = View.VISIBLE
@@ -91,13 +177,13 @@ class TermuxFileReceiverActivity : ComponentActivity() {
                 val lengthToMb = FileIOUtils.getLengthToMb(mFile!!)
                 if (lengthToMb != null) {
                     msg_file.text = UUtils.getString(R.string.file_name_copy)
-                        .replace("{file}", mFile!!.name)
+                        .replace("{file}", incomingFileName ?: mFile!!.name)
                         .replace("{size}", lengthToMb)
                         .replace("{path}", mFile!!.absolutePath)
                         .replace("{suffix}", FileIOUtils.getExtension(mFile!!))
                 } else {
                     msg_file.text = UUtils.getString(R.string.file_name_copy)
-                        .replace("{file}", "N/A")
+                        .replace("{file}", incomingFileName ?: "N/A")
                         .replace("{size}", "N/A")
                         .replace("{path}", "N/A")
                         .replace("{suffix}", "N/A")
@@ -110,7 +196,7 @@ class TermuxFileReceiverActivity : ComponentActivity() {
                     finish()
                     return@setOnClickListener
                 }
-                val file = File(FileIOUtils.getHomePath(UUtils.getContext()), mFile!!.name)
+                val file = File(FileIOUtils.getHomePath(UUtils.getContext()), incomingFileName ?: mFile!!.name)
                 LogUtils.d(TAG, "onCreate file: ${file.absolutePath}")
                 if (!file.exists()) {
                     file.createNewFile()

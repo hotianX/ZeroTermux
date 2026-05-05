@@ -139,3 +139,6 @@
 -keep class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
+# Jsoup
+-keep class org.jsoup.** { *; }
+-dontwarn org.jsoup.**

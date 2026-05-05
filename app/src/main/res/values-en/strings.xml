@@ -1307,4 +1307,27 @@ cd ~ &amp;&amp; pkg update -y \n
     <string name="zt_xml_menu_error">XML format is incorrect. Please modify and retry using the command:\nzt menu update\nOr use the command:\nzt menu update\nto reset.\n\n-Click this error message to directly open the editor-\n\nError details:\n\n</string>
     <string name="zt_xml_settings_title">Disable Using Configuration File for Left Menu Settings</string>
     <string name="zt_xml_settings_summary">(Requires APP restart) Enabling this option will prevent loading the XML configuration file as the data source for the left menu.</string>
+
+    <string name="zt_usage_habits_title">Usage Habits</string>
+    <string name="zt_usage_habits_content">Note (Usage habit related options can be re-customized in ZT settings)\n
+        Choose a usage habit\n
+        termux (Buttons follow the native layout completely)\n
+        ZeroTermux (Buttons follow the ZT layout completely)\n
+        Please select a usage habit</string>
+    <string name="zt_usage_habits_termux">Termux usage habit set successfully. Please go to settings to change the configuration.</string>
+    <string name="zt_usage_habits_ztermux">ZeroTermux usage habit set successfully. Please go to settings to change the configuration.</string>
+    <string name="zt_guide">Double-tap the edge of the screen to bring up the left/right menu bar\nIf you have set the ZT usage habit, use the Volume +\- keys\nIf the left/right sidebar cannot close this window\nLong press here to force close</string>
+    <string name="zt_core_date_error">There is an error in the upper and lower data of the core terminal. Please return to the desktop and try again.</string>
+    <string name="zt_terminal_unavailable_command_not_sent">Terminal is not ready. Command was not sent.</string>
+    <string name="zt_terminal_unavailable_key_not_sent">Terminal is not ready. Key was not sent.</string>
+    <string name="zt_terminal_unavailable_text_not_read">Terminal is not ready. Unable to read terminal content.</string>
+
+    <string name="llm_input_key_error_info_400">Possible issues:\n\nReturned 400, API Key is not set or an incorrect key was entered.</string>
+    <string name="llm_input_key_error_info_401">Possible issues: returned 401, API key is incorrect or authentication failed. Please check whether your API key is correct.</string>
+    <string name="llm_input_key_error_info_402">Possible issues:\n\nReturned 402, account balance is insufficient. Please check the account balance and recharge with the corresponding AI provider.</string>
+    <string name="llm_input_key_error_info_422">Possible issues:\n\nReturned 422, parameter error. This is uncommon; check whether the key or request settings are correct.</string>
+    <string name="llm_input_key_error_info_429">Possible issues: returned 429, and the request rate (TPM or RPM) reached the upper limit.</string>
+    <string name="llm_input_key_error_info_500">Possible issues: returned 500, the AI provider server has an internal error. Please wait and try again. If the problem persists, contact the provider.</string>
+    <string name="llm_input_key_error_info_503">Possible issues: returned 503, server load is too high. Please retry your request later.</string>
+    <string name="llm_input_key_error_info_other">Possible issues:\n\nReturned an unrecognized code. The server may have dropped this request. Please retry your request later.</string>
 </resources>

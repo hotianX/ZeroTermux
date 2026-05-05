@@ -53,11 +53,13 @@
                    android:layout_alignParentBottom="true"
                    android:layout_height="wrap_content">
                    <Button
+                       android:id="@+id/key_bord_button"
                        android:layout_width="0dp"
                        android:layout_weight="1"
-                       android:visibility="invisible"
-                       android:layout_height="wrap_content"/>
-
+                       style="?android:attr/buttonBarButtonStyle"
+                       android:textColor="@color/color_ffffff"
+                       android:layout_height="wrap_content"
+                       android:text="@string/action_toggle_soft_keyboard" />
 
                    <Button
                        android:id="@+id/new_session_button"

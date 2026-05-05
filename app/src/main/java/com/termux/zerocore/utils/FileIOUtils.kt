@@ -40,6 +40,11 @@ object FileIOUtils {
     public const val MAIN_MENU_EDIT_MENU_ICON_PATH = "/ZtInfo/edit_menu.png"
     public const val DATA_MESSAGE_PATH = "/ZtInfo/data.config"
     public const val DATA_MESSAGE_PATH_FOLDER = "/ZtInfo"
+    // 左/右侧菜单栏背景
+    public const val LEFT_MENU_BACK_FOLDER = "/ZtInfo/menuBack"
+    public const val LEFT_MENU_BACK = "/ZtInfo/menuBack/left.png"
+    public const val RIGHT_MENU_BACK = "/ZtInfo/menuBack/right.png"
+    public const val MENU_BACK_INFO = "/ZtInfo/menuBack/info.txt"
     //网站默认地址
     public const val HTML_PATH = "/ztlink/html"
     public const val XINHAO_PATH = "/ztlink/xinhao"
@@ -465,6 +470,36 @@ object FileIOUtils {
             file.mkdirs()
         }
         return File(homePath, MAIN_MENU_XML_PATH)
+    }
+
+    public fun getLeftMenuBackFile(): File {
+        val homePath = getHomePath(UUtils.getContext())
+        val file = File(homePath, LEFT_MENU_BACK_FOLDER)
+        if (!file.exists()) {
+            LogUtils.d(TAG, "folder is create")
+            file.mkdirs()
+        }
+        return File(homePath, LEFT_MENU_BACK)
+    }
+
+    public fun getRightMenuBackFile(): File {
+        val homePath = getHomePath(UUtils.getContext())
+        val file = File(homePath, LEFT_MENU_BACK_FOLDER)
+        if (!file.exists()) {
+            LogUtils.d(TAG, "folder is create")
+            file.mkdirs()
+        }
+        return File(homePath, RIGHT_MENU_BACK)
+    }
+
+    public fun getInfoMenuBackFile(): File {
+        val homePath = getHomePath(UUtils.getContext())
+        val file = File(homePath, LEFT_MENU_BACK_FOLDER)
+        if (!file.exists()) {
+            LogUtils.d(TAG, "folder is create")
+            file.mkdirs()
+        }
+        return File(homePath, MENU_BACK_INFO)
     }
 
     public fun getMainEditMenuIconPathFile(): File {

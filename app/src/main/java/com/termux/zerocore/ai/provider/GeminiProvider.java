@@ -135,17 +135,18 @@ public class GeminiProvider implements AIProvider {
 
     @Override
     public String parseError(int statusCode, String responseBody) {
+        String providerMessage = null;
         try {
             JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
             if (json.has("error")) {
                 JsonObject error = json.getAsJsonObject("error");
-                return error.has("message") ? error.get("message").getAsString() : responseBody;
+                providerMessage = error.has("message") ? error.get("message").getAsString() : responseBody;
             }
         } catch (Exception ignored) {
         }
-        if (statusCode == 403) {
-            return "Gemini API key is invalid or permission denied. Please check your API key.";
+        if (providerMessage == null || providerMessage.isEmpty()) {
+            providerMessage = responseBody;
         }
-        return "Gemini Error " + statusCode + ": " + responseBody;
+        return ProviderErrorUtils.formatError(statusCode, providerMessage);
     }
 }

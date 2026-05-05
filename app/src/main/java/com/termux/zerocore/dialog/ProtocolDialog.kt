@@ -10,8 +10,10 @@ import com.example.xh_lib.utils.UUtils
 import com.termux.R
 import com.termux.app.TermuxService
 import com.termux.shared.termux.TermuxConstants
+import com.termux.zerocore.ftp.utils.UserSetManage
 import com.termux.zerocore.utils.ViewBackUtils
 import com.termux.zerocore.view.CustomScrollView
+import kotlinx.coroutines.Runnable
 import java.lang.RuntimeException
 
 class ProtocolDialog : BaseDialogCentre, View.OnFocusChangeListener {
@@ -40,6 +42,7 @@ class ProtocolDialog : BaseDialogCentre, View.OnFocusChangeListener {
         }
         ok?.setOnClickListener {
             if (isYD){
+                usageHabits()
                 SaveData.saveStringOther("xieyi","true")
                 dismiss()
             }else{
@@ -57,6 +60,29 @@ class ProtocolDialog : BaseDialogCentre, View.OnFocusChangeListener {
 
         })
         focusManagement()
+    }
+
+    // 使用习惯
+    private fun usageHabits() {
+        var switchDialog = SwitchDialog(mContext)
+        switchDialog.title?.text = UUtils.getString(R.string.zt_usage_habits_title)
+        switchDialog.msg?.text = UUtils.getString(R.string.zt_usage_habits_content)
+        switchDialog.ok?.text = "Termux"
+        switchDialog.ok?.setOnClickListener {
+            val ztUserBean = UserSetManage.get().getZTUserBean()
+            ztUserBean.isToolShow = true
+            ztUserBean.isResetVolume = true
+            UserSetManage.get().setZTUserBean(ztUserBean)
+            UUtils.showMsg(UUtils.getString(R.string.zt_usage_habits_termux))
+            switchDialog.dismiss()
+        }
+        switchDialog.cancel?.text = "ZeroTermux"
+        switchDialog.cancel?.setOnClickListener {
+            UUtils.showMsg(UUtils.getString(R.string.zt_usage_habits_ztermux))
+            switchDialog.dismiss()
+        }
+        switchDialog.other?.visibility = View.GONE
+        switchDialog.show()
     }
     private fun focusManagement() {
         custom_scroll?.onFocusChangeListener = this

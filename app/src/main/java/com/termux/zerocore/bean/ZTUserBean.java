@@ -39,8 +39,27 @@ public class ZTUserBean {
     // 是否折叠菜单
     private boolean isCloseFoldMenu;
     // 是否禁用主菜单配置文件
-
     private boolean isDisableMainConfigMenu;
+    // 是否显示引导页面
+    private boolean isHideGuideLayout;
+    // 是否写入过菜单背景
+    private boolean isWriterMenuBack;
+
+    public boolean isWriterMenuBack() {
+        return isWriterMenuBack;
+    }
+
+    public void setWriterMenuBack(boolean writerMenuBack) {
+        isWriterMenuBack = writerMenuBack;
+    }
+
+    public boolean isHideGuideLayout() {
+        return isHideGuideLayout;
+    }
+
+    public void setHideGuideLayout(boolean hideGuideLayout) {
+        isHideGuideLayout = hideGuideLayout;
+    }
 
     public boolean isDisableMainConfigMenu() {
         return isDisableMainConfigMenu;
