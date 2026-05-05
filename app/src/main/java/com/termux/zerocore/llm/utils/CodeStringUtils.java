@@ -12,6 +12,8 @@ public class CodeStringUtils {
                 return UUtils.getString(R.string.llm_input_key_error_info_401);
             case 402:
                 return UUtils.getString(R.string.llm_input_key_error_info_402);
+            case 403:
+                return UUtils.getString(R.string.llm_input_key_error_info_403);
             case 422:
                 return UUtils.getString(R.string.llm_input_key_error_info_422);
             case 429:

@@ -117,10 +117,15 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
 
         })
 
-        // 设置 DeepSeep Key
-        val llmApiKey = UserSetManage.get().getZTUserBean().llmApiKey
+        // 设置 AI Key
+        val providerApiKey = dbHelper.defaultProvider?.apiKey
+        val legacyApiKey = UserSetManage.get().getZTUserBean().llmApiKey
+        val llmApiKey = if (!providerApiKey.isNullOrEmpty()) providerApiKey else legacyApiKey
         if (!TextUtils.isEmpty(llmApiKey)) {
             mLlmApiKeyEdit.setText(llmApiKey)
+            if (providerApiKey.isNullOrEmpty()) {
+                dbHelper.updateDefaultProviderApiKey(llmApiKey)
+            }
         }
        mLlmApiKeyEdit.addTextChangedListener(object : TextWatcher {
            override fun beforeTextChanged(
@@ -137,9 +142,10 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
                p3: Int
            ) {
                val ztUserBean = UserSetManage.get().getZTUserBean()
-               var llmApiKey = p0?.toString()
+               val llmApiKey = p0?.toString()
                ztUserBean.llmApiKey = llmApiKey
                UserSetManage.get().setZTUserBean(ztUserBean)
+               dbHelper.updateDefaultProviderApiKey(llmApiKey)
            }
            override fun afterTextChanged(p0: Editable?) {
            }

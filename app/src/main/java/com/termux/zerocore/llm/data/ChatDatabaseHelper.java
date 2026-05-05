@@ -44,11 +44,8 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_MODEL_NAME = "model_name";
     private static final String COLUMN_IS_DEFAULT = "is_default";
 
-    private final Context mContext;
-
     public ChatDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.mContext = context;
     }
 
     @Override
@@ -85,7 +82,7 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_IS_DEFAULT + " INTEGER DEFAULT 0" + ");");
 
         // Insert default provider
-        insertDefaultProvider(db, "");
+        insertDefaultProvider(db, readApiKeyFromSharedPrefs());
     }
 
     @Override
@@ -198,6 +195,19 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_IS_DEFAULT, profile.isDefault() ? 1 : 0);
         int rows = db.update(TABLE_AI_PROVIDERS, values,
             COLUMN_ID + " = ?", new String[]{String.valueOf(profile.getId())});
+        return rows > 0;
+    }
+
+    public boolean updateDefaultProviderApiKey(String apiKey) {
+        ProviderProfile defaultProvider = getDefaultProvider();
+        if (defaultProvider == null) {
+            return false;
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_API_KEY, apiKey != null ? apiKey : "");
+        int rows = db.update(TABLE_AI_PROVIDERS, values,
+            COLUMN_ID + " = ?", new String[]{String.valueOf(defaultProvider.getId())});
         return rows > 0;
     }
 

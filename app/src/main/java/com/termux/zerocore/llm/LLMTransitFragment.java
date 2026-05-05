@@ -79,7 +79,7 @@ public class LLMTransitFragment extends Fragment {
                 ChatFragment chatFragment = ChatFragment.newInstance();
                 chatFragment.setIntent(intent);
                 chatFragment.setLlmTransitFragment(this);
-                fragmentTransaction.replace(R.id.frame_layout, ChatFragment.newInstance(), "ChatFragment")
+                fragmentTransaction.replace(R.id.frame_layout, chatFragment, "ChatFragment")
                     .commitAllowingStateLoss();
                 break;
         }

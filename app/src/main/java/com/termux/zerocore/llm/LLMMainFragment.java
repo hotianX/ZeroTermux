@@ -1,12 +1,10 @@
 package com.termux.zerocore.llm;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,7 +20,6 @@ import com.termux.zerocore.llm.data.ChatDatabaseHelper;
 import com.termux.zerocore.llm.data.ChatSession;
 import com.termux.zerocore.llm.data.ChatSessionAdapter;
 
-import java.util.Collections;
 import java.util.List;
 
 public class LLMMainFragment extends Fragment {
@@ -100,6 +97,9 @@ public class LLMMainFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mLlmTransitFragment = null;
-        adapter.release();
+        if (adapter != null) {
+            adapter.release();
+        }
+        llmMainFragment = null;
     }
 }

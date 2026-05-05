@@ -3,15 +3,12 @@ package com.termux.zerocore.llm;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -19,7 +16,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.xh_lib.utils.LogUtils;
 import com.example.xh_lib.utils.UUtils;
 import com.termux.R;
-import com.termux.app.TermuxActivity;
 import com.termux.zerocore.ai.model.AIClient;
 import com.termux.zerocore.ai.model.ProviderProfile;
 import com.termux.zerocore.ai.provider.AIProvider;
@@ -105,19 +100,12 @@ public class ChatFragment extends Fragment {
 
     private void initView() {
         dbHelper = new ChatDatabaseHelper(getContext());
-
-        // Load default provider
-        loadDefaultProvider();
-
         chatRecyclerView = mView.findViewById(R.id.chatRecyclerView);
         mCancel = mView.findViewById(R.id.cancel);
         messageInput = mView.findViewById(R.id.messageInput);
         sendButton = mView.findViewById(R.id.sendButton);
         testText = mView.findViewById(R.id.testText);
         providerSpinner = mView.findViewById(R.id.provider_spinner);
-
-        // Initialize provider spinner
-        initProviderSpinner();
 
         if (mIntent == null) {
             LogUtils.e(TAG, "initView intent is null return.");
@@ -126,6 +114,7 @@ public class ChatFragment extends Fragment {
 
         // Clear state from previous session to prevent leakage
         requestMessageItemList.clear();
+        messages.clear();
         mText.setLength(0);
         newMsg = true;
 
@@ -136,7 +125,10 @@ public class ChatFragment extends Fragment {
         } else {
             sessionId = mIntent.getStringExtra("sessionId");
             messages.addAll(dbHelper.getMessagesForSession(sessionId));
+            restoreRequestMessagesFromHistory();
         }
+        loadCurrentProvider();
+        initProviderSpinner();
         mCancel.setOnClickListener(view -> {
             mLlmTransitFragment.switchFragment(0, null);
             messages.clear();
@@ -145,11 +137,9 @@ public class ChatFragment extends Fragment {
         adapter = new ChatMessageAdapter(getContext(), messages);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         chatRecyclerView.setAdapter(adapter);
-        adapter.notifyItemInserted(messages.size() - 1);
 
         sendButton.setOnClickListener(v -> sendMessage());
-       // scrollToBottom();
-        chatRecyclerView.scrollToPosition(adapter.getItemCount() - 1);
+        scrollToBottom();
     }
 
     private void sendMessage() {
@@ -227,6 +217,7 @@ public class ChatFragment extends Fragment {
                     mText.setLength(0);
                     UUtils.runOnUIThread(() -> {
                         localProcessingMessage(errorMessage, true);
+                        newMsg = true;
                     });
                 }
 
@@ -256,6 +247,14 @@ public class ChatFragment extends Fragment {
                     }
                 }
             });
+    }
+
+    private void restoreRequestMessagesFromHistory() {
+        for (ChatMessage message : messages) {
+            requestMessageItemList.add(new RequestMessageItem(
+                message.isUser() ? RequestMessageItem.ROLE_USER : RequestMessageItem.ROLE_ASSISTANT,
+                message.getMessageText()));
+        }
     }
 
 
@@ -301,24 +300,32 @@ public class ChatFragment extends Fragment {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         providerSpinner.setAdapter(spinnerAdapter);
 
-        // Set initial selection to default provider
-        int defaultIndex = 0;
+        int selectedIndex = 0;
         for (int i = 0; i < providerList.size(); i++) {
-            if (providerList.get(i).isDefault()) {
-                defaultIndex = i;
+            ProviderProfile provider = providerList.get(i);
+            if (currentProfile != null && provider.getId() == currentProfile.getId()) {
+                selectedIndex = i;
                 break;
             }
+            if (currentProfile == null && provider.isDefault()) {
+                selectedIndex = i;
+            }
         }
-        providerSpinner.setSelection(defaultIndex);
+        if (!providerList.isEmpty()) {
+            providerSpinner.setSelection(selectedIndex);
+        }
 
         providerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private boolean isFirstSelection = true;
+            private boolean ignoreInitialSelection = true;
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (isFirstSelection) {
-                    isFirstSelection = false;
-                    return;
+                if (ignoreInitialSelection) {
+                    ignoreInitialSelection = false;
+                    if (currentProfile == null || position < 0 || position >= providerList.size()
+                        || providerList.get(position).getId() == currentProfile.getId()) {
+                        return;
+                    }
                 }
                 if (position >= 0 && position < providerList.size()) {
                     currentProfile = providerList.get(position);
@@ -339,8 +346,17 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void loadDefaultProvider() {
-        currentProfile = dbHelper.getDefaultProvider();
+    private void loadCurrentProvider() {
+        currentProfile = null;
+        if (sessionId != null) {
+            ChatSession session = dbHelper.getSessionById(sessionId);
+            if (session != null && session.getProviderId() > 0) {
+                currentProfile = dbHelper.getProviderById(session.getProviderId());
+            }
+        }
+        if (currentProfile == null) {
+            currentProfile = dbHelper.getDefaultProvider();
+        }
         if (currentProfile != null) {
             currentProvider = AIClient.getProvider(currentProfile.getFormatType());
         } else {
@@ -357,7 +373,9 @@ public class ChatFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mLlmTransitFragment = null;
-        adapter.release();
+        if (adapter != null) {
+            adapter.release();
+        }
         chatFragment = null;
     }
 

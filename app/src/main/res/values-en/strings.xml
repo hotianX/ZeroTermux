@@ -1325,6 +1325,7 @@ cd ~ &amp;&amp; pkg update -y \n
     <string name="llm_input_key_error_info_400">Possible issues:\n\nReturned 400, API Key is not set or an incorrect key was entered.</string>
     <string name="llm_input_key_error_info_401">Possible issues: returned 401, API key is incorrect or authentication failed. Please check whether your API key is correct.</string>
     <string name="llm_input_key_error_info_402">Possible issues:\n\nReturned 402, account balance is insufficient. Please check the account balance and recharge with the corresponding AI provider.</string>
+    <string name="llm_input_key_error_info_403">Possible issues:\n\nReturned 403, the API key has no permission or the provider denied access. Check the API key, model permissions, and provider console settings.</string>
     <string name="llm_input_key_error_info_422">Possible issues:\n\nReturned 422, parameter error. This is uncommon; check whether the key or request settings are correct.</string>
     <string name="llm_input_key_error_info_429">Possible issues: returned 429, and the request rate (TPM or RPM) reached the upper limit.</string>
     <string name="llm_input_key_error_info_500">Possible issues: returned 500, the AI provider server has an internal error. Please wait and try again. If the problem persists, contact the provider.</string>
