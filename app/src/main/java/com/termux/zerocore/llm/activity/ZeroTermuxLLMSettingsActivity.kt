@@ -1,7 +1,5 @@
 package com.termux.zerocore.llm.activity
 
-import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableString
@@ -11,7 +9,6 @@ import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
@@ -30,11 +27,6 @@ import com.termux.zerocore.ai.model.ProviderProfile
 import com.termux.zerocore.llm.data.ChatDatabaseHelper
 import com.termux.zerocore.llm.model.Config
 import com.termux.zerocore.ftp.utils.UserSetManage
-import com.termux.zerocore.url.FileUrl
-import com.termux.zerocore.utils.FileHttpUtils.Companion.get
-import com.topjohnwu.superuser.Shell
-import com.zp.z_file.util.LogUtils
-import java.io.File
 
 class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
     companion object {
@@ -42,9 +34,7 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
     }
 
     private val mKeyClick by lazy { findViewById<EditText>(R.id.key_click) }
-    private val mLlmApiKeyEdit by lazy { findViewById<EditText>(R.id.llm_api_key_edit) }
     private val mKeyClickSummary by lazy { findViewById<TextView>(R.id.key_click_summary) }
-    private val mLlmKeySummary by lazy { findViewById<TextView>(R.id.llm_key_summary) }
 
     private val mAiVisibleSwitch by lazy { findViewById<SwitchCompat>(R.id.ai_visible_switch) }
     private val mAiVisibleLayout by lazy { findViewById<LinearLayout>(R.id.ai_visible_layout) }
@@ -117,40 +107,6 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
 
         })
 
-        // 设置 AI Key
-        val providerApiKey = dbHelper.defaultProvider?.apiKey
-        val legacyApiKey = UserSetManage.get().getZTUserBean().llmApiKey
-        val llmApiKey = if (!providerApiKey.isNullOrEmpty()) providerApiKey else legacyApiKey
-        if (!TextUtils.isEmpty(llmApiKey)) {
-            mLlmApiKeyEdit.setText(llmApiKey)
-            if (providerApiKey.isNullOrEmpty()) {
-                dbHelper.updateDefaultProviderApiKey(llmApiKey)
-            }
-        }
-       mLlmApiKeyEdit.addTextChangedListener(object : TextWatcher {
-           override fun beforeTextChanged(
-               p0: CharSequence?,
-               p1: Int,
-               p2: Int,
-               p3: Int
-           ) {
-           }
-           override fun onTextChanged(
-               p0: CharSequence?,
-               p1: Int,
-               p2: Int,
-               p3: Int
-           ) {
-               val ztUserBean = UserSetManage.get().getZTUserBean()
-               val llmApiKey = p0?.toString()
-               ztUserBean.llmApiKey = llmApiKey
-               UserSetManage.get().setZTUserBean(ztUserBean)
-               dbHelper.updateDefaultProviderApiKey(llmApiKey)
-           }
-           override fun afterTextChanged(p0: Editable?) {
-           }
-       })
-
         // Add Provider button
         mAddProviderCard.setOnClickListener {
             showProviderDialog(null)
@@ -167,14 +123,6 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
                 mKeyClick.setText(Config.COMMANDS)
             }
         })
-
-        mLlmKeySummary.text = getKeyClickText(UUtils.getString(R.string.llm_settings_key_edit_info_keyword),
-            UUtils.getString(R.string.llm_settings_key_edit_info), object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    startActivity(Intent(this@ZeroTermuxLLMSettingsActivity, ZeroTermuxLLMKeyActivity::class.java))
-                }
-            })
-        mLlmKeySummary.movementMethod = LinkMovementMethod.getInstance()
         mKeyClickSummary.movementMethod = LinkMovementMethod.getInstance()
     }
 
@@ -233,9 +181,12 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setMessage(String.format(getString(R.string.ai_provider_delete_confirm), provider.name))
                 .setPositiveButton(R.string.ai_delete) { _, _ ->
-                    dbHelper.deleteProvider(provider.id)
-                    Toast.makeText(this, R.string.ai_provider_deleted, Toast.LENGTH_SHORT).show()
-                    refreshProviderList()
+                    if (dbHelper.deleteProviderAndReassignSessions(provider.id)) {
+                        Toast.makeText(this, R.string.ai_provider_deleted, Toast.LENGTH_SHORT).show()
+                        refreshProviderList()
+                    } else {
+                        Toast.makeText(this, R.string.ai_provider_delete_failed, Toast.LENGTH_SHORT).show()
+                    }
                 }
                 .setNegativeButton(R.string.ai_cancel, null)
                 .show()

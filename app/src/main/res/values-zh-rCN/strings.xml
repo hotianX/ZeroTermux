@@ -1200,7 +1200,7 @@
     <string name="llm_empty">当前无会话，请点击右上角新增会话</string>
     <string name="llm_send_command">发送到终端</string>
     <string name="llm_settings_seepseek">AI 设置</string>
-    <string name="llm_settings_seepseek_summary">设置 AI 相关选项，例如: API Key</string>
+    <string name="llm_settings_seepseek_summary">设置 AI 提供者、模型和系统提示词</string>
 
     <string name="llm_settings_recognition">输入代码识别关键字 </string>
     <string name="llm_settings_recognition_edit">将代码识别关键字输入到此处，将自动保存</string>
@@ -1210,36 +1210,10 @@
     <string name="llm_settings_recognition_edit_keyword">点击此处恢复默认</string>
     <string name="llm_settings_recognition_error_toast">格式化命令失败,请重新设置 “代码识别关键字”</string>
 
-    <string name="llm_settings_url">输入 API 接口地址</string>
-    <string name="llm_settings_url_edit">将官网的密钥输入到此处，将自动保存</string>
-    <string name="llm_settings_url_edit_summary">将官网的密钥输入到此处，将自动保存</string>
-    <string name="llm_settings_url_edit_info">目前此处为 API 接口地址，此处不清楚的话不要随意修改，随意修改可能导致接口无法访问</string>
-
-    <string name="llm_settings_key">输入 API 密钥</string>
-    <string name="llm_settings_key_edit">将官网的密钥输入到此处，将自动保存</string>
-    <string name="llm_settings_key_edit_summary">将官网的密钥输入到此处，将自动保存</string>
-    <string name="llm_settings_key_edit_info">请输入 API 密钥，填写到此处即可。不清楚密钥怎么获取，可点击：密钥获取方式</string>
-    <string name="llm_settings_key_edit_info_keyword">密钥获取方式</string>
-
-    <string name="llm_settings_send_command">点击蓝色命令直接执行</string>
-    <string name="llm_settings_send_command_summary">点击显示蓝色的指令之后，直接在终端执行，而不是显示在终端</string>
-
-    <string name="llm_settings_send_close">发送到终端之后关闭侧边栏</string>
-    <string name="llm_settings_send_close_summary">在 长按 会话显示菜单当中，“发送到终端” 选项点击之后关闭右侧侧边栏</string>
-
     <string name="llm_settings_ai_see">让AI看到你的终端</string>
     <string name="llm_settings_ai_see_summary">不用在会话当中输入你的终端错误，直接说: 终端报错,AI会自动浏览你的终端内容(AI只能读取到你最近记录的上限600个字符内)</string>
 
     <string name="llm_settings_ai_session_name">编辑会话名称</string>
-
-    <string name="llm_settings_ai_get_key">获取 API Key</string>
-    <string name="llm_settings_ai_get_key_1">获取 API Key，先打开对应 AI 服务商官方网站点击此处打开,然后如下图</string>
-    <string name="llm_settings_ai_get_key_1_keyword">点击此处打开</string>
-    <string name="llm_settings_ai_get_key_1_url">https://platform.deepseek.com/</string>
-    <string name="llm_settings_ai_get_key_2">登录账号之后，点击左侧栏的 API Keys</string>
-    <string name="llm_settings_ai_get_key_3">然后点击 “创建 API keys”</string>
-    <string name="llm_settings_ai_get_key_4">随意输入一个名称就行</string>
-    <string name="llm_settings_ai_get_key_5">复制此处的key到 ZT 里边的 AI 设置编辑框即可</string>
 
     <!-- AI Provider System -->
     <string name="ai_settings_title">AI 设置</string>
@@ -1248,6 +1222,7 @@
     <string name="ai_provider_edit">编辑提供者</string>
     <string name="ai_provider_delete_confirm">确定要删除提供者 \"%s\" 吗？</string>
     <string name="ai_provider_delete_last">无法删除最后一个提供者</string>
+    <string name="ai_provider_delete_failed">删除提供者失败</string>
     <string name="ai_provider_name">名称</string>
     <string name="ai_provider_name_hint">例如: DeepSeek、OpenAI</string>
     <string name="ai_provider_format">API 格式</string>

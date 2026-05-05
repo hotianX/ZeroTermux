@@ -198,24 +198,58 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         return rows > 0;
     }
 
-    public boolean updateDefaultProviderApiKey(String apiKey) {
-        ProviderProfile defaultProvider = getDefaultProvider();
-        if (defaultProvider == null) {
+    public boolean deleteProviderAndReassignSessions(long providerId) {
+        ProviderProfile replacement = getFallbackProviderExcluding(providerId);
+        if (replacement == null) {
             return false;
         }
+
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_API_KEY, apiKey != null ? apiKey : "");
-        int rows = db.update(TABLE_AI_PROVIDERS, values,
-            COLUMN_ID + " = ?", new String[]{String.valueOf(defaultProvider.getId())});
-        return rows > 0;
+        db.beginTransaction();
+        try {
+            ContentValues sessionValues = new ContentValues();
+            sessionValues.put(COLUMN_PROVIDER_ID, replacement.getId());
+            db.update(TABLE_CHAT_SESSIONS, sessionValues,
+                COLUMN_PROVIDER_ID + " = ?", new String[]{String.valueOf(providerId)});
+
+            int rows = db.delete(TABLE_AI_PROVIDERS,
+                COLUMN_ID + " = ?", new String[]{String.valueOf(providerId)});
+
+            if (rows > 0) {
+                Cursor defaultCursor = db.query(TABLE_AI_PROVIDERS, new String[]{COLUMN_ID},
+                    COLUMN_IS_DEFAULT + " = 1", null, null, null, null, "1");
+                boolean hasDefault = defaultCursor != null && defaultCursor.moveToFirst();
+                if (defaultCursor != null) {
+                    defaultCursor.close();
+                }
+                if (!hasDefault) {
+                    ContentValues defaultValues = new ContentValues();
+                    defaultValues.put(COLUMN_IS_DEFAULT, 1);
+                    db.update(TABLE_AI_PROVIDERS, defaultValues,
+                        COLUMN_ID + " = ?", new String[]{String.valueOf(replacement.getId())});
+                }
+                db.setTransactionSuccessful();
+                return true;
+            }
+            return false;
+        } finally {
+            db.endTransaction();
+        }
     }
 
-    public boolean deleteProvider(long providerId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int rows = db.delete(TABLE_AI_PROVIDERS,
-            COLUMN_ID + " = ?", new String[]{String.valueOf(providerId)});
-        return rows > 0;
+    private ProviderProfile getFallbackProviderExcluding(long excludedProviderId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_AI_PROVIDERS, null,
+            COLUMN_ID + " != ?", new String[]{String.valueOf(excludedProviderId)},
+            null, null, COLUMN_IS_DEFAULT + " DESC, " + COLUMN_ID + " ASC", "1");
+        ProviderProfile provider = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            provider = cursorToProvider(cursor);
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
+        return provider;
     }
 
     public List<ProviderProfile> getAllProviders() {

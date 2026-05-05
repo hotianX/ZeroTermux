@@ -98,10 +98,6 @@
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
-        <activity android:name=".zerocore.llm.activity.ZeroTermuxLLMKeyActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".zerocore.settings.ZeroTermuxX11Settings"
             android:exported="false"
