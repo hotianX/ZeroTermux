@@ -3,6 +3,7 @@ package com.termux.zerocore.ai.model;
 import com.example.xh_lib.utils.LogUtils;
 import com.termux.zerocore.ai.provider.AIProvider;
 import com.termux.zerocore.ai.provider.ClaudeProvider;
+import com.termux.zerocore.ai.provider.DeepSeekProvider;
 import com.termux.zerocore.ai.provider.GeminiProvider;
 import com.termux.zerocore.ai.provider.OpenAIProvider;
 import com.termux.zerocore.llm.model.RequestMessageItem;
@@ -36,6 +37,8 @@ public class AIClient {
 
     public interface Listener {
         void onError(String errorMessage);
+        void onReasoning(String reasoningContent);
+        void onToolCalls(String toolCallsJson);
         void onMessage(String content);
         void onComplete();
     }
@@ -46,6 +49,7 @@ public class AIClient {
     public static AIProvider getProvider(String formatType) {
         if (formatType == null) return new OpenAIProvider();
         switch (formatType) {
+            case "deepseek": return new DeepSeekProvider();
             case "claude": return new ClaudeProvider();
             case "gemini": return new GeminiProvider();
             default: return new OpenAIProvider();
@@ -88,13 +92,21 @@ public class AIClient {
                                     break;
                                 }
                                 try {
+                                    String reasoningContent = provider.parseReasoningStreamChunk(line);
+                                    if (reasoningContent != null && !reasoningContent.isEmpty()) {
+                                        listener.onReasoning(reasoningContent);
+                                    }
+                                    String toolCallsJson = provider.parseToolCallsStreamChunk(line);
+                                    if (toolCallsJson != null && !toolCallsJson.isEmpty()) {
+                                        listener.onToolCalls(toolCallsJson);
+                                    }
                                     String content = provider.parseStreamChunk(line);
                                     if (content != null && !content.isEmpty()) {
                                         listener.onMessage(content);
                                     }
                                 } catch (AIProviderException e) {
                                     LogUtils.e(TAG, "Stream parse error: " + e);
-                                    // Continue reading — individual chunk errors shouldn't kill the stream
+                                    // Continue reading; individual chunk errors should not kill the stream.
                                 }
                             }
                             listener.onComplete();

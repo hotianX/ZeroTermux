@@ -1146,8 +1146,8 @@
     <string name="llm_input_key_error_start_info">错误信息:\n</string>
     <string name="llm_empty">当前无会话，请点击右上角新增会话</string>
     <string name="llm_send_command">发送到终端</string>
-    <string name="llm_settings_seepseek">AI 设置</string>
-    <string name="llm_settings_seepseek_summary">设置 AI 提供者、模型和系统提示词</string>
+    <string name="llm_settings_title">AI 设置</string>
+    <string name="llm_settings_summary">设置 AI 提供者、模型和系统提示词</string>
 
     <string name="llm_settings_recognition">输入代码识别关键字 </string>
     <string name="llm_settings_recognition_edit">将代码识别关键字输入到此处，将自动保存</string>
@@ -1178,7 +1178,11 @@
     <string name="ai_provider_key">API 密钥</string>
     <string name="ai_provider_key_hint">输入你的 API 密钥</string>
     <string name="ai_provider_model">模型名称</string>
-    <string name="ai_provider_model_hint">例如: deepseek-chat、gpt-4o</string>
+    <string name="ai_provider_model_hint">例如: deepseek-v4-pro、gpt-4o</string>
+    <string name="ai_provider_refresh_models">刷新模型</string>
+    <string name="ai_provider_models_loaded">已获取 %d 个模型</string>
+    <string name="ai_provider_models_empty">未获取到模型</string>
+    <string name="ai_provider_models_failed">获取模型失败</string>
     <string name="ai_provider_name_required">请输入提供者名称</string>
     <string name="ai_provider_url_required">请输入 API 地址</string>
     <string name="ai_provider_model_required">请输入模型名称</string>
@@ -1187,9 +1191,12 @@
     <string name="ai_provider_default_badge">默认</string>
     <string name="ai_provider_set_default">设为默认</string>
     <string name="ai_provider_set_default_done">已设为默认</string>
+    <string name="ai_format_deepseek">DeepSeek</string>
     <string name="ai_format_openai">OpenAI 兼容</string>
     <string name="ai_format_claude">Anthropic Claude</string>
     <string name="ai_format_gemini">Google Gemini</string>
+    <string name="ai_deepseek_thinking">启用思考模式</string>
+    <string name="ai_deepseek_reasoning_effort">推理强度</string>
     <string name="ai_system_prompt_section">系统提示词</string>
     <string name="ai_system_prompt_hint">输入自定义系统提示词...</string>
     <string name="ai_chat_title">AI 助手</string>

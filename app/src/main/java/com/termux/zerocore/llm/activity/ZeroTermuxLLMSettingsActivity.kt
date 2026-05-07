@@ -22,11 +22,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.cardview.widget.CardView
 import com.example.xh_lib.utils.UUtils
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.termux.R
 import com.termux.zerocore.ai.model.ProviderProfile
 import com.termux.zerocore.llm.data.ChatDatabaseHelper
 import com.termux.zerocore.llm.model.Config
 import com.termux.zerocore.ftp.utils.UserSetManage
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
     companion object {
@@ -46,12 +55,19 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
     private lateinit var dbHelper: ChatDatabaseHelper
 
     // Format type display names and values
-    private val formatTypes = arrayOf("openai", "claude", "gemini")
+    private val formatTypes = arrayOf("deepseek", "openai", "claude", "gemini")
+    private val reasoningEffortValues = arrayOf("high", "max")
     private val defaultUrls = mapOf(
+        "deepseek" to "https://api.deepseek.com/chat/completions",
         "openai" to "https://api.openai.com/v1/chat/completions",
         "claude" to "https://api.anthropic.com/v1/messages",
         "gemini" to "https://generativelanguage.googleapis.com/v1beta"
     )
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -202,9 +218,14 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
         val urlEdit = dialogView.findViewById<EditText>(R.id.provider_url)
         val keyEdit = dialogView.findViewById<EditText>(R.id.provider_key)
         val modelEdit = dialogView.findViewById<EditText>(R.id.provider_model)
+        val refreshModels = dialogView.findViewById<TextView>(R.id.provider_refresh_models)
+        val deepSeekOptions = dialogView.findViewById<LinearLayout>(R.id.deepseek_options_container)
+        val deepSeekThinkingSwitch = dialogView.findViewById<SwitchCompat>(R.id.deepseek_thinking_switch)
+        val deepSeekReasoningEffortSpinner = dialogView.findViewById<Spinner>(R.id.deepseek_reasoning_effort_spinner)
 
         // Format spinner setup
         val formatNames = arrayOf(
+            getString(R.string.ai_format_deepseek),
             getString(R.string.ai_format_openai),
             getString(R.string.ai_format_claude),
             getString(R.string.ai_format_gemini)
@@ -212,17 +233,30 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, formatNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         formatSpinner.adapter = adapter
+        val effortAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, reasoningEffortValues)
+        effortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        deepSeekReasoningEffortSpinner.adapter = effortAdapter
 
         // Auto-fill URL when format changes
         formatSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedFormat = formatTypes[position]
+                deepSeekOptions.visibility = if (selectedFormat == "deepseek") View.VISIBLE else View.GONE
+                refreshModels.visibility = if (selectedFormat == "deepseek") View.VISIBLE else View.GONE
                 // Only auto-fill if URL is empty or matches a default URL
                 val currentUrl = urlEdit.text.toString().trim()
                 if (currentUrl.isEmpty() || defaultUrls.values.contains(currentUrl)) {
-                    urlEdit.setText(defaultUrls[formatTypes[position]] ?: "")
+                    urlEdit.setText(defaultUrls[selectedFormat] ?: "")
+                }
+                if (selectedFormat == "deepseek" && modelEdit.text.toString().trim().isEmpty()) {
+                    modelEdit.setText("deepseek-v4-pro")
                 }
             }
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
+        refreshModels.setOnClickListener {
+            refreshDeepSeekModels(urlEdit.text.toString().trim(), keyEdit.text.toString().trim(), modelEdit)
         }
 
         // Fill existing values if editing
@@ -233,6 +267,12 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
             modelEdit.setText(existing.modelName)
             val formatIndex = formatTypes.indexOf(existing.formatType)
             if (formatIndex >= 0) formatSpinner.setSelection(formatIndex)
+            deepSeekThinkingSwitch.isChecked = existing.isDeepSeekThinkingEnabled()
+            val effortIndex = reasoningEffortValues.indexOf(existing.getDeepSeekReasoningEffort())
+            deepSeekReasoningEffortSpinner.setSelection(if (effortIndex >= 0) effortIndex else 0)
+        } else {
+            deepSeekThinkingSwitch.isChecked = true
+            deepSeekReasoningEffortSpinner.setSelection(0)
         }
 
         val title = if (existing != null) getString(R.string.ai_provider_edit) else getString(R.string.ai_provider_add)
@@ -246,6 +286,11 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
                 val key = keyEdit.text.toString().trim()
                 val model = modelEdit.text.toString().trim()
                 val formatType = formatTypes[formatSpinner.selectedItemPosition]
+                val optionsJson = buildOptionsJson(
+                    formatType,
+                    deepSeekThinkingSwitch.isChecked,
+                    reasoningEffortValues[deepSeekReasoningEffortSpinner.selectedItemPosition]
+                )
 
                 // Validation
                 if (name.isEmpty()) {
@@ -267,9 +312,10 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
                     existing.apiUrl = url
                     existing.apiKey = key
                     existing.modelName = model
+                    existing.optionsJson = optionsJson
                     dbHelper.updateProvider(existing)
                 } else {
-                    val profile = ProviderProfile(0, name, formatType, url, key, model, false)
+                    val profile = ProviderProfile(0, name, formatType, url, key, model, false, optionsJson)
                     dbHelper.insertProvider(profile)
                 }
 
@@ -282,9 +328,88 @@ class ZeroTermuxLLMSettingsActivity : AppCompatActivity() {
 
     private fun getFormatDisplayName(formatType: String): String {
         return when (formatType) {
+            "deepseek" -> getString(R.string.ai_format_deepseek)
             "claude" -> getString(R.string.ai_format_claude)
             "gemini" -> getString(R.string.ai_format_gemini)
             else -> getString(R.string.ai_format_openai)
+        }
+    }
+
+    private fun buildOptionsJson(formatType: String, thinkingEnabled: Boolean, reasoningEffort: String): String {
+        if (formatType != "deepseek") {
+            return ""
+        }
+        val options = JsonObject()
+        options.addProperty("thinking_enabled", thinkingEnabled)
+        options.addProperty("reasoning_effort", reasoningEffort)
+        return options.toString()
+    }
+
+    private fun refreshDeepSeekModels(chatUrl: String, apiKey: String, modelEdit: EditText) {
+        if (apiKey.isEmpty()) {
+            Toast.makeText(this, R.string.ai_provider_key_hint, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val modelsUrl = getDeepSeekModelsUrl(chatUrl)
+        val request = Request.Builder()
+            .url(modelsUrl)
+            .addHeader("Authorization", "Bearer $apiKey")
+            .get()
+            .build()
+
+        httpClient.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@ZeroTermuxLLMSettingsActivity, R.string.ai_provider_models_failed, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val body = response.body?.string().orEmpty()
+                val models = parseModelIds(body)
+                runOnUiThread {
+                    if (!response.isSuccessful || models.isEmpty()) {
+                        val msg = if (response.isSuccessful) R.string.ai_provider_models_empty else R.string.ai_provider_models_failed
+                        Toast.makeText(this@ZeroTermuxLLMSettingsActivity, msg, Toast.LENGTH_SHORT).show()
+                        return@runOnUiThread
+                    }
+                    val currentModel = modelEdit.text.toString().trim()
+                    val selectedModel = when {
+                        currentModel.isNotEmpty() && models.contains(currentModel) -> currentModel
+                        models.contains("deepseek-v4-pro") -> "deepseek-v4-pro"
+                        else -> models.first()
+                    }
+                    modelEdit.setText(selectedModel)
+                    Toast.makeText(
+                        this@ZeroTermuxLLMSettingsActivity,
+                        String.format(getString(R.string.ai_provider_models_loaded), models.size),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        })
+    }
+
+    private fun getDeepSeekModelsUrl(chatUrl: String): String {
+        val normalized = if (chatUrl.isEmpty()) defaultUrls["deepseek"]!! else chatUrl
+        val url = normalized.trimEnd('/')
+        return when {
+            url.endsWith("/models") -> url
+            url.endsWith("/chat/completions") -> url.removeSuffix("/chat/completions") + "/models"
+            url.endsWith("/beta/completions") -> url.removeSuffix("/beta/completions") + "/models"
+            else -> "$url/models"
+        }
+    }
+
+    private fun parseModelIds(body: String): List<String> {
+        return try {
+            val data = JsonParser.parseString(body).asJsonObject.getAsJsonArray("data")
+            data.mapNotNull { item ->
+                val obj = item.asJsonObject
+                if (obj.has("id")) obj.get("id").asString else null
+            }
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 

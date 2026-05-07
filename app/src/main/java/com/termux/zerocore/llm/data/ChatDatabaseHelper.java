@@ -18,9 +18,8 @@ import java.util.List;
 public class ChatDatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = ChatDatabaseHelper.class.getSimpleName();
     private static final String DATABASE_NAME = "chat.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
 
-    // 表和列名
     private static final String TABLE_CHAT_SESSIONS = "chat_sessions";
     private static final String COLUMN_ID = "_id";
     private static final String COLUMN_SESSION_ID = "session_id";
@@ -32,7 +31,9 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_MESSAGE_ID = "_id";
     private static final String COLUMN_SESSION_REF_ID = "session_id";
     private static final String COLUMN_MESSAGE_TEXT = "message_text";
-    private static final String COLUMN_IS_USER = "is_user"; // 是否是用户发送的消息
+    private static final String COLUMN_REASONING_TEXT = "reasoning_text";
+    private static final String COLUMN_TOOL_CALLS_JSON = "tool_calls_json";
+    private static final String COLUMN_IS_USER = "is_user"; // 1 for user, 0 for assistant
     private static final String COLUMN_TIMESTAMP = "timestamp";
     private static final String COLUMN_AVATAR_RES_ID = "avatar_res_id";
 
@@ -43,6 +44,7 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_API_KEY = "api_key";
     private static final String COLUMN_MODEL_NAME = "model_name";
     private static final String COLUMN_IS_DEFAULT = "is_default";
+    private static final String COLUMN_OPTIONS_JSON = "options_json";
 
     public ChatDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -50,7 +52,6 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // 创建会话表 (v3 schema)
         db.execSQL("CREATE TABLE " + TABLE_CHAT_SESSIONS + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_SESSION_ID + " TEXT,"
@@ -58,11 +59,12 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_CREATED_AT + " INTEGER,"
             + COLUMN_PROVIDER_ID + " INTEGER" + ");");
 
-        // 创建消息表
         db.execSQL("CREATE TABLE " + TABLE_MESSAGES + "("
             + COLUMN_MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_SESSION_REF_ID + " TEXT,"
             + COLUMN_MESSAGE_TEXT + " TEXT,"
+            + COLUMN_REASONING_TEXT + " TEXT,"
+            + COLUMN_TOOL_CALLS_JSON + " TEXT,"
             + COLUMN_IS_USER + " INTEGER," // 1 for user, 0 for bot
             + COLUMN_TIMESTAMP + " INTEGER,"
             + COLUMN_AVATAR_RES_ID + " INTEGER" + ");");
@@ -71,7 +73,6 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX idx_messages_session ON " + TABLE_MESSAGES
             + "(" + COLUMN_SESSION_REF_ID + ", " + COLUMN_TIMESTAMP + ")");
 
-        // 创建AI提供者表
         db.execSQL("CREATE TABLE " + TABLE_AI_PROVIDERS + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_PROVIDER_NAME + " TEXT NOT NULL,"
@@ -79,7 +80,8 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_API_URL + " TEXT NOT NULL,"
             + COLUMN_API_KEY + " TEXT DEFAULT '',"
             + COLUMN_MODEL_NAME + " TEXT NOT NULL,"
-            + COLUMN_IS_DEFAULT + " INTEGER DEFAULT 0" + ");");
+            + COLUMN_IS_DEFAULT + " INTEGER DEFAULT 0,"
+            + COLUMN_OPTIONS_JSON + " TEXT DEFAULT ''" + ");");
 
         // Insert default provider
         insertDefaultProvider(db, readApiKeyFromSharedPrefs());
@@ -88,18 +90,24 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 2) {
-            // 升级到版本2：添加消息表
             db.execSQL("CREATE TABLE " + TABLE_MESSAGES + "("
                 + COLUMN_MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + COLUMN_SESSION_REF_ID + " TEXT,"
                 + COLUMN_MESSAGE_TEXT + " TEXT,"
+                + COLUMN_REASONING_TEXT + " TEXT,"
+                + COLUMN_TOOL_CALLS_JSON + " TEXT,"
                 + COLUMN_IS_USER + " INTEGER,"
                 + COLUMN_TIMESTAMP + " INTEGER,"
                 + COLUMN_AVATAR_RES_ID + " INTEGER" + ");");
         }
         if (oldVersion < 3) {
-            // 升级到版本3：添加AI提供者表和相关列
             upgradeToV3(db);
+        }
+        if (oldVersion < 4) {
+            upgradeToV4(db);
+        }
+        if (oldVersion < 5) {
+            upgradeToV5(db);
         }
     }
 
@@ -112,7 +120,8 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_API_URL + " TEXT NOT NULL,"
             + COLUMN_API_KEY + " TEXT DEFAULT '',"
             + COLUMN_MODEL_NAME + " TEXT NOT NULL,"
-            + COLUMN_IS_DEFAULT + " INTEGER DEFAULT 0" + ");");
+            + COLUMN_IS_DEFAULT + " INTEGER DEFAULT 0,"
+            + COLUMN_OPTIONS_JSON + " TEXT DEFAULT ''" + ");");
 
         // Add provider_id column to chat_sessions
         db.execSQL("ALTER TABLE " + TABLE_CHAT_SESSIONS
@@ -135,6 +144,47 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
             db.update(TABLE_CHAT_SESSIONS, values,
                 COLUMN_PROVIDER_ID + " IS NULL", null);
         }
+    }
+
+    private void upgradeToV4(SQLiteDatabase db) {
+        addColumnIfMissing(db, TABLE_MESSAGES, COLUMN_REASONING_TEXT, "TEXT");
+        addColumnIfMissing(db, TABLE_AI_PROVIDERS, COLUMN_OPTIONS_JSON, "TEXT DEFAULT ''");
+        migrateDeepSeekProviders(db);
+    }
+
+    private void upgradeToV5(SQLiteDatabase db) {
+        addColumnIfMissing(db, TABLE_MESSAGES, COLUMN_TOOL_CALLS_JSON, "TEXT");
+    }
+
+    private void addColumnIfMissing(SQLiteDatabase db, String tableName, String columnName, String columnDefinition) {
+        Cursor cursor = db.rawQuery("PRAGMA table_info(" + tableName + ")", null);
+        boolean hasColumn = false;
+        while (cursor.moveToNext()) {
+            String existingName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            if (columnName.equals(existingName)) {
+                hasColumn = true;
+                break;
+            }
+        }
+        cursor.close();
+        if (!hasColumn) {
+            db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " " + columnDefinition);
+        }
+    }
+
+    private void migrateDeepSeekProviders(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_FORMAT_TYPE, "deepseek");
+        values.put(COLUMN_OPTIONS_JSON, "{\"thinking_enabled\":true,\"reasoning_effort\":\"high\"}");
+        db.update(TABLE_AI_PROVIDERS, values,
+            COLUMN_API_URL + " LIKE ? AND " + COLUMN_FORMAT_TYPE + " = ?",
+            new String[]{"%api.deepseek.com%", "openai"});
+
+        ContentValues modelValues = new ContentValues();
+        modelValues.put(COLUMN_MODEL_NAME, "deepseek-v4-pro");
+        db.update(TABLE_AI_PROVIDERS, modelValues,
+            COLUMN_API_URL + " LIKE ? AND " + COLUMN_MODEL_NAME + " IN (?, ?)",
+            new String[]{"%api.deepseek.com%", "deepseek-chat", "deepseek-reasoner"});
     }
 
     /**
@@ -162,11 +212,12 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
     private long insertDefaultProvider(SQLiteDatabase db, String apiKey) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROVIDER_NAME, "DeepSeek");
-        values.put(COLUMN_FORMAT_TYPE, "openai");
+        values.put(COLUMN_FORMAT_TYPE, "deepseek");
         values.put(COLUMN_API_URL, "https://api.deepseek.com/chat/completions");
         values.put(COLUMN_API_KEY, apiKey != null ? apiKey : "");
-        values.put(COLUMN_MODEL_NAME, "deepseek-chat");
+        values.put(COLUMN_MODEL_NAME, "deepseek-v4-pro");
         values.put(COLUMN_IS_DEFAULT, 1);
+        values.put(COLUMN_OPTIONS_JSON, "{\"thinking_enabled\":true,\"reasoning_effort\":\"high\"}");
         return db.insert(TABLE_AI_PROVIDERS, null, values);
     }
 
@@ -181,6 +232,7 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_API_KEY, profile.getApiKey());
         values.put(COLUMN_MODEL_NAME, profile.getModelName());
         values.put(COLUMN_IS_DEFAULT, profile.isDefault() ? 1 : 0);
+        values.put(COLUMN_OPTIONS_JSON, profile.getOptionsJson());
         return db.insert(TABLE_AI_PROVIDERS, null, values);
     }
 
@@ -193,6 +245,7 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_API_KEY, profile.getApiKey());
         values.put(COLUMN_MODEL_NAME, profile.getModelName());
         values.put(COLUMN_IS_DEFAULT, profile.isDefault() ? 1 : 0);
+        values.put(COLUMN_OPTIONS_JSON, profile.getOptionsJson());
         int rows = db.update(TABLE_AI_PROVIDERS, values,
             COLUMN_ID + " = ?", new String[]{String.valueOf(profile.getId())});
         return rows > 0;
@@ -343,13 +396,21 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_API_URL)),
             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_API_KEY)),
             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MODEL_NAME)),
-            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_DEFAULT)) == 1
+            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_DEFAULT)) == 1,
+            getOptionalString(cursor, COLUMN_OPTIONS_JSON)
         );
+    }
+
+    private String getOptionalString(Cursor cursor, String columnName) {
+        int index = cursor.getColumnIndex(columnName);
+        if (index < 0 || cursor.isNull(index)) {
+            return "";
+        }
+        return cursor.getString(index);
     }
 
     // ========================= Session Methods =========================
 
-    // 插入一个新的会话
     public void insertSession(String sessionId, String sessionName) {
         insertSession(sessionId, sessionName, 0);
     }
@@ -366,7 +427,6 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         db.insert(TABLE_CHAT_SESSIONS, null, values);
     }
 
-    // 更新会话名称
     public boolean updateSession(String sessionId, String newSessionName) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -378,7 +438,6 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         return rowsAffected > 0;
     }
 
-    // 更新会话的提供者
     public boolean updateSessionProvider(String sessionId, long providerId) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -388,34 +447,27 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         return rows > 0;
     }
 
-    // 删除一个会话及其所有消息
     public boolean deleteSession(String sessionId) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // 开始事务
         db.beginTransaction();
         try {
-            // 删除会话的所有消息
             int messagesDeleted = db.delete(TABLE_MESSAGES,
                 COLUMN_SESSION_REF_ID + " = ?",
                 new String[]{sessionId});
 
-            // 删除会话本身
             int sessionsDeleted = db.delete(TABLE_CHAT_SESSIONS,
                 COLUMN_SESSION_ID + " = ?",
                 new String[]{sessionId});
 
-            // 标记事务成功
             db.setTransactionSuccessful();
 
             return sessionsDeleted > 0;
         } finally {
-            // 结束事务
             db.endTransaction();
         }
     }
 
-    // 批量删除多个会话
     public boolean deleteSessions(List<String> sessionIds) {
         if (sessionIds == null || sessionIds.isEmpty()) {
             return false;
@@ -423,10 +475,8 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // 开始事务
         db.beginTransaction();
         try {
-            // 为每个会话ID构建占位符
             StringBuilder placeholders = new StringBuilder();
             for (int i = 0; i < sessionIds.size(); i++) {
                 placeholders.append("?");
@@ -435,27 +485,22 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
                 }
             }
 
-            // 删除这些会话的所有消息
             int messagesDeleted = db.delete(TABLE_MESSAGES,
                 COLUMN_SESSION_REF_ID + " IN (" + placeholders.toString() + ")",
                 sessionIds.toArray(new String[0]));
 
-            // 删除这些会话本身
             int sessionsDeleted = db.delete(TABLE_CHAT_SESSIONS,
                 COLUMN_SESSION_ID + " IN (" + placeholders.toString() + ")",
                 sessionIds.toArray(new String[0]));
 
-            // 标记事务成功
             db.setTransactionSuccessful();
 
             return sessionsDeleted > 0;
         } finally {
-            // 结束事务
             db.endTransaction();
         }
     }
 
-    // 根据sessionId获取会话信息
     public ChatSession getSessionById(String sessionId) {
         SQLiteDatabase db = this.getReadableDatabase();
         ChatSession session = null;
@@ -476,7 +521,6 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         return session;
     }
 
-    // 检查会话是否存在
     public boolean sessionExists(String sessionId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_CHAT_SESSIONS,
@@ -491,7 +535,6 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    // 获取所有会话列表
     public List<ChatSession> getAllSessions() {
         List<ChatSession> sessions = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -517,35 +560,46 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
 
     // ========================= Message Methods =========================
 
-    // 插入一条消息
     public void insertMessage(String sessionId, String messageText, boolean isUser, long timestamp, int avatarResId) {
+        insertMessage(sessionId, messageText, null, isUser, timestamp, avatarResId);
+    }
+
+    public void insertMessage(String sessionId, String messageText, String reasoningText,
+                              boolean isUser, long timestamp, int avatarResId) {
+        insertMessage(sessionId, messageText, reasoningText, null, isUser, timestamp, avatarResId);
+    }
+
+    public void insertMessage(String sessionId, String messageText, String reasoningText,
+                              String toolCallsJson, boolean isUser, long timestamp, int avatarResId) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_SESSION_REF_ID, sessionId);
         values.put(COLUMN_MESSAGE_TEXT, messageText);
+        values.put(COLUMN_REASONING_TEXT, reasoningText);
+        values.put(COLUMN_TOOL_CALLS_JSON, toolCallsJson);
         values.put(COLUMN_IS_USER, isUser ? 1 : 0); // 1 for user, 0 for bot
         values.put(COLUMN_TIMESTAMP, timestamp);
         values.put(COLUMN_AVATAR_RES_ID, avatarResId);
         db.insert(TABLE_MESSAGES, null, values);
     }
 
-    // 获取特定会话的所有消息
     public List<ChatMessage> getMessagesForSession(String sessionId) {
         List<ChatMessage> messages = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_MESSAGES, null, COLUMN_SESSION_REF_ID + "=?", new String[]{sessionId}, null, null, COLUMN_TIMESTAMP + " ASC");
         while (cursor.moveToNext()) {
             String messageText = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_TEXT));
+            String reasoningText = getOptionalString(cursor, COLUMN_REASONING_TEXT);
+            String toolCallsJson = getOptionalString(cursor, COLUMN_TOOL_CALLS_JSON);
             boolean isUser = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_USER)) == 1;
             long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TIMESTAMP));
             int avatarResId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_AVATAR_RES_ID));
-            messages.add(new ChatMessage(messageText, isUser, timestamp, avatarResId));
+            messages.add(new ChatMessage(messageText, reasoningText, toolCallsJson, isUser, timestamp, avatarResId));
         }
         cursor.close();
         return messages;
     }
 
-    // 删除特定会话的所有消息
     public int deleteMessagesForSession(String sessionId) {
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete(TABLE_MESSAGES,

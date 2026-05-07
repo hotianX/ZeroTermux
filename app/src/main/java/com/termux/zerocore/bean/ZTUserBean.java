@@ -1,5 +1,6 @@
 package com.termux.zerocore.bean;
 
+import com.google.gson.annotations.SerializedName;
 import com.termux.shared.termux.settings.properties.TermuxPropertyConstants;
 
 public class ZTUserBean {
@@ -28,12 +29,12 @@ public class ZTUserBean {
     // LLM 本地蓝色连接字点击
     private String mCommandLink;
 
-    // LLM api Key (字段名保留，Gson序列化兼容)
-    private String mDeepSeekApiKey;
-    // LLM url (字段名保留，Gson序列化兼容)
-    private String mDeepSeekApiUrl;
-    // 是否让AI看见你的终端? (字段名保留，Gson序列化兼容)
-    private boolean mIsDeepSeekVisibleTerminal;
+    @SerializedName(value = "mLlmApiKey", alternate = {"mDeepSeekApiKey"})
+    private String mLlmApiKey;
+    @SerializedName(value = "mLlmApiUrl", alternate = {"mDeepSeekApiUrl"})
+    private String mLlmApiUrl;
+    @SerializedName(value = "mIsLlmVisibleTerminal", alternate = {"mIsDeepSeekVisibleTerminal"})
+    private boolean mIsLlmVisibleTerminal;
     // 自定义AI系统提示语
     private String mCustomSystemPrompt;
     // 是否折叠菜单
@@ -78,11 +79,11 @@ public class ZTUserBean {
     }
 
     public boolean isIsLlmVisibleTerminal() {
-        return mIsDeepSeekVisibleTerminal;
+        return mIsLlmVisibleTerminal;
     }
 
-    public void setIsLlmVisibleTerminal(boolean mIsDeepSeekVisibleTerminal) {
-        this.mIsDeepSeekVisibleTerminal = mIsDeepSeekVisibleTerminal;
+    public void setIsLlmVisibleTerminal(boolean isLlmVisibleTerminal) {
+        this.mIsLlmVisibleTerminal = isLlmVisibleTerminal;
     }
 
     public String getCustomSystemPrompt() {
@@ -94,19 +95,19 @@ public class ZTUserBean {
     }
 
     public String getLlmApiUrl() {
-        return mDeepSeekApiUrl;
+        return mLlmApiUrl;
     }
 
-    public void setLlmApiUrl(String mDeepSeekApiUrl) {
-        this.mDeepSeekApiUrl = mDeepSeekApiUrl;
+    public void setLlmApiUrl(String llmApiUrl) {
+        this.mLlmApiUrl = llmApiUrl;
     }
 
     public String getLlmApiKey() {
-        return mDeepSeekApiKey;
+        return mLlmApiKey;
     }
 
-    public void setLlmApiKey(String mDeepSeekApiKey) {
-        this.mDeepSeekApiKey = mDeepSeekApiKey;
+    public void setLlmApiKey(String llmApiKey) {
+        this.mLlmApiKey = llmApiKey;
     }
 
     public String getCommandLink() {

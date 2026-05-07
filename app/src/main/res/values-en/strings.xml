@@ -1190,8 +1190,8 @@ Known Issue: Rapid consecutive back operations may cause black screen in Interna
     <string name="llm_input_key_error_start_info">Error message:\n</string>
     <string name="llm_empty">No current session. Please tap the top-right corner to create a new session.</string>
     <string name="llm_send_command">Send to Terminal</string>
-    <string name="llm_settings_seepseek">AI Settings</string>
-    <string name="llm_settings_seepseek_summary">Configure AI providers, models, and system prompt.</string>
+    <string name="llm_settings_title">AI Settings</string>
+    <string name="llm_settings_summary">Configure AI providers, models, and system prompt.</string>
     <string name="llm_settings_recognition">Input Code Recognition Keywords</string>
     <string name="llm_settings_recognition_edit">Enter code recognition keywords here; they will be saved automatically.</string>
     <string name="llm_settings_recognition_edit_summary">Enter code recognition keywords here; they will be saved automatically.</string>
@@ -1219,7 +1219,11 @@ Enter code recognition parameters separated by commas. These will appear as blue
     <string name="ai_provider_key">API Key</string>
     <string name="ai_provider_key_hint">Enter your API key</string>
     <string name="ai_provider_model">Model Name</string>
-    <string name="ai_provider_model_hint">e.g. deepseek-chat, gpt-4o</string>
+    <string name="ai_provider_model_hint">e.g. deepseek-v4-pro, gpt-4o</string>
+    <string name="ai_provider_refresh_models">Refresh models</string>
+    <string name="ai_provider_models_loaded">Loaded %d models</string>
+    <string name="ai_provider_models_empty">No models returned</string>
+    <string name="ai_provider_models_failed">Failed to load models</string>
     <string name="ai_provider_name_required">Provider name is required</string>
     <string name="ai_provider_url_required">API URL is required</string>
     <string name="ai_provider_model_required">Model name is required</string>
@@ -1228,9 +1232,12 @@ Enter code recognition parameters separated by commas. These will appear as blue
     <string name="ai_provider_default_badge">Default</string>
     <string name="ai_provider_set_default">Set Default</string>
     <string name="ai_provider_set_default_done">Set as default</string>
+    <string name="ai_format_deepseek">DeepSeek</string>
     <string name="ai_format_openai">OpenAI Compatible</string>
     <string name="ai_format_claude">Anthropic Claude</string>
     <string name="ai_format_gemini">Google Gemini</string>
+    <string name="ai_deepseek_thinking">Enable thinking mode</string>
+    <string name="ai_deepseek_reasoning_effort">Reasoning effort</string>
     <string name="ai_system_prompt_section">System Prompt</string>
     <string name="ai_system_prompt_hint">Enter custom system prompt...</string>
     <string name="ai_chat_title">AI Assistant</string>

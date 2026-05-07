@@ -52,7 +52,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         MarkDownAPI markDownAPI = MarkDownAPI.create(context);
 
         Markwon markwon = builder.usePlugin(markDownAPI).build();
-        Spanned markdown = markwon.toMarkdown(message.getMessageText());
+        Spanned markdown = markwon.toMarkdown(getDisplayText(message));
         Spanned finalSpanned = SpannableTextUtil.createClickableSpannableString(markdown, context);
         markwon.setParsedMarkdown(holder.messageTextView, finalSpanned);
         holder.messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -86,10 +86,42 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         }
     }
 
-    // 更新特定消息的内容并通知适配器刷新
     public void updateMessageText(int position, String additionalText) {
         ChatMessage message = messages.get(position);
         message.appendMessageText(additionalText);
         notifyItemChanged(position);
+    }
+
+    public void updateReasoningText(int position, String additionalText) {
+        ChatMessage message = messages.get(position);
+        message.appendReasoningText(additionalText);
+        notifyItemChanged(position);
+    }
+
+    public void updateToolCallsJson(int position, String toolCallsJson) {
+        ChatMessage message = messages.get(position);
+        message.setToolCallsJson(toolCallsJson);
+        notifyItemChanged(position);
+    }
+
+    private String getDisplayText(ChatMessage message) {
+        String messageText = message.getMessageText();
+        String reasoningText = message.getReasoningText();
+        String toolCallsJson = message.getToolCallsJson();
+        if (message.isUser()) {
+            return messageText;
+        }
+        String finalText = messageText == null ? "" : messageText;
+        if (reasoningText != null && !reasoningText.isEmpty()) {
+            finalText = "**Thinking**\n\n> " + reasoningText.replace("\n", "\n> ")
+                + "\n\n" + finalText;
+        }
+        if (toolCallsJson != null && !toolCallsJson.isEmpty()) {
+            if (!finalText.isEmpty()) {
+                finalText += "\n\n";
+            }
+            finalText += "**Tool calls**\n\n```json\n" + toolCallsJson + "\n```";
+        }
+        return finalText;
     }
 }

@@ -116,6 +116,8 @@ public class ChatFragment extends Fragment {
         requestMessageItemList.clear();
         messages.clear();
         mText.setLength(0);
+        mReasoningText.setLength(0);
+        mToolCallsJson = null;
         newMsg = true;
 
         boolean isNew = mIntent.getBooleanExtra("isNew", false);
@@ -158,10 +160,8 @@ public class ChatFragment extends Fragment {
         scrollToBottom();
     }
 
-    // 新增滚动到底部的方法
     private void scrollToBottom() {
         if (chatRecyclerView != null && adapter != null) {
-            // 使用 post 确保在 UI 线程执行，并且在布局更新后执行
             chatRecyclerView.post(() -> {
                 if (adapter.getItemCount() > 0) {
                     chatRecyclerView.scrollToPosition(adapter.getItemCount() - 1);
@@ -199,14 +199,18 @@ public class ChatFragment extends Fragment {
     }
 
     StringBuilder mText = new StringBuilder();
+    StringBuilder mReasoningText = new StringBuilder();
+    String mToolCallsJson;
 
     private void reqModel(String text) {
         // Clear mText at start to prevent stale data from previous errors
         mText.setLength(0);
+        mReasoningText.setLength(0);
+        mToolCallsJson = null;
 
         requestMessageItemList.add(new RequestMessageItem(RequestMessageItem.ROLE_USER, text));
 
-        // System prompt is passed separately — providers place it per their API requirements
+        // System prompt is passed separately; providers place it per their API requirements.
         String systemPrompt = getPrompt();
 
         aiClient.ask(currentProvider, currentProfile, requestMessageItemList, systemPrompt,
@@ -215,10 +219,24 @@ public class ChatFragment extends Fragment {
                 public void onError(String errorMessage) {
                     LogUtils.e(TAG, "AI request error: " + errorMessage);
                     mText.setLength(0);
+                    mReasoningText.setLength(0);
+                    mToolCallsJson = null;
                     UUtils.runOnUIThread(() -> {
                         localProcessingMessage(errorMessage, true);
                         newMsg = true;
                     });
+                }
+
+                @Override
+                public void onReasoning(String reasoningContent) {
+                    LogUtils.e(TAG, "onReasoning content: " + reasoningContent);
+                    mReasoningText.append(reasoningContent);
+                    UUtils.runOnUIThread(() -> localProcessingReasoning(reasoningContent));
+                }
+
+                @Override
+                public void onToolCalls(String toolCallsJson) {
+                    mToolCallsJson = toolCallsJson;
                 }
 
                 @Override
@@ -235,13 +253,27 @@ public class ChatFragment extends Fragment {
                 public void onComplete() {
                     input();
                     LogUtils.e(TAG, "onComplete mText: " + mText);
-                    if (mText.length() > 0) {
+                    if (mText.length() > 0 || mReasoningText.length() > 0
+                        || (mToolCallsJson != null && !mToolCallsJson.isEmpty())) {
                         UUtils.runOnUIThread(() -> {
                             String msg = mText.toString();
+                            String reasoningMsg = mReasoningText.length() > 0 ? mReasoningText.toString() : null;
                             LogUtils.e(TAG, "onComplete insertMessage sessionId: " + sessionId + " ,msg: " + msg);
-                            dbHelper.insertMessage(sessionId, msg, false, System.currentTimeMillis(), 1);
-                            requestMessageItemList.add(new RequestMessageItem(RequestMessageItem.ROLE_ASSISTANT, msg));
+                            dbHelper.insertMessage(sessionId, msg, reasoningMsg, mToolCallsJson,
+                                false, System.currentTimeMillis(), 1);
+                            if (newMsg) {
+                                messages.add(new ChatMessage(msg, reasoningMsg, mToolCallsJson,
+                                    false, System.currentTimeMillis(), 1));
+                                adapter.notifyItemInserted(messages.size() - 1);
+                            } else if (mToolCallsJson != null && !mToolCallsJson.isEmpty()
+                                && !messages.isEmpty()) {
+                                adapter.updateToolCallsJson(messages.size() - 1, mToolCallsJson);
+                            }
+                            requestMessageItemList.add(new RequestMessageItem(
+                                RequestMessageItem.ROLE_ASSISTANT, msg, reasoningMsg, null, mToolCallsJson));
                             mText.delete(0, mText.length());
+                            mReasoningText.delete(0, mReasoningText.length());
+                            mToolCallsJson = null;
                             newMsg = true;
                         });
                     }
@@ -253,7 +285,8 @@ public class ChatFragment extends Fragment {
         for (ChatMessage message : messages) {
             requestMessageItemList.add(new RequestMessageItem(
                 message.isUser() ? RequestMessageItem.ROLE_USER : RequestMessageItem.ROLE_ASSISTANT,
-                message.getMessageText()));
+                message.getMessageText(),
+                message.getReasoningText(), null, message.getToolCallsJson()));
         }
     }
 
@@ -333,6 +366,8 @@ public class ChatFragment extends Fragment {
                     // Clear conversation context when switching providers
                     requestMessageItemList.clear();
                     mText.setLength(0);
+                    mReasoningText.setLength(0);
+                    mToolCallsJson = null;
                     newMsg = true;
                     // Update session provider
                     if (sessionId != null) {
@@ -360,12 +395,24 @@ public class ChatFragment extends Fragment {
         if (currentProfile != null) {
             currentProvider = AIClient.getProvider(currentProfile.getFormatType());
         } else {
-            // Fallback: use OpenAI-compatible with DeepSeek defaults
-            currentProvider = AIClient.getProvider("openai");
-            currentProfile = new ProviderProfile(0, "DeepSeek", "openai",
+            // Fallback to the first-class DeepSeek provider defaults.
+            currentProvider = AIClient.getProvider("deepseek");
+            currentProfile = new ProviderProfile(0, "DeepSeek", "deepseek",
                 "https://api.deepseek.com/chat/completions",
                 UserSetManage.Companion.get().getZTUserBean().getLlmApiKey(),
-                "deepseek-chat", true);
+                "deepseek-v4-pro", true,
+                "{\"thinking_enabled\":true,\"reasoning_effort\":\"high\"}");
+        }
+    }
+
+    private void localProcessingReasoning(String msg) {
+        if (newMsg) {
+            messages.add(new ChatMessage("", msg, false, System.currentTimeMillis(), 1));
+            adapter.notifyItemInserted(messages.size() - 1);
+            newMsg = false;
+        } else {
+            adapter.updateReasoningText(messages.size() - 1, msg);
+            scrollToBottom();
         }
     }
 
@@ -379,7 +426,6 @@ public class ChatFragment extends Fragment {
         chatFragment = null;
     }
 
-    // 获取终端助手提示语
     private String getPrompt() {
         boolean isLlmVisibleTerminal = UserSetManage.Companion.get().getZTUserBean().isIsLlmVisibleTerminal();
         String customPrompt = UserSetManage.Companion.get().getZTUserBean().getCustomSystemPrompt();

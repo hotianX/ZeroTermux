@@ -1,6 +1,5 @@
 package com.termux.zerocore.ai.provider;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -15,7 +14,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 /**
- * OpenAI-compatible provider. Covers DeepSeek, OpenAI, Groq, Ollama, vLLM, etc.
+ * OpenAI-compatible provider for generic chat-completions APIs.
  */
 public class OpenAIProvider implements AIProvider {
 

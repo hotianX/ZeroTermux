@@ -14,10 +14,10 @@ import okhttp3.Request;
  */
 public interface AIProvider {
 
-    /** Unique format identifier: "openai", "claude", "gemini" */
+    /** Unique format identifier: "deepseek", "openai", "claude", "gemini" */
     String getFormatType();
 
-    /** Display name: "OpenAI Compatible", "Anthropic Claude", "Google Gemini" */
+    /** Display name: "DeepSeek", "OpenAI Compatible", "Anthropic Claude", "Google Gemini" */
     String getDisplayName();
 
     /**
@@ -38,6 +38,16 @@ public interface AIProvider {
 
     /** Parse a streaming chunk line. Return content delta, or null if no content. */
     String parseStreamChunk(String line) throws AIProviderException;
+
+    /** Parse provider-specific reasoning stream content. Return null if unsupported. */
+    default String parseReasoningStreamChunk(String line) throws AIProviderException {
+        return null;
+    }
+
+    /** Parse provider-specific tool call stream content. Return null if unsupported. */
+    default String parseToolCallsStreamChunk(String line) throws AIProviderException {
+        return null;
+    }
 
     /** Return true if this line signals stream completion */
     boolean isStreamComplete(String line);
