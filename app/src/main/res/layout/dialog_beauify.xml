@@ -167,6 +167,37 @@
                         android:textStyle="bold"
                         android:layout_marginTop="10dp"
                         android:textColor="@color/color_ffffff"
+                        android:text="@string/back_menu_visible"
+                        android:layout_height="wrap_content"/>
+
+                    <Switch
+                        android:layout_width="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:id="@+id/back_menu_visible"
+                        android:checked="true"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"
+                        android:textColor="@color/color_ffffff"
+                        android:text="@string/back_menu_visible_summary"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="10dp"
+                        android:background="@color/color_55ffffff"
+                        android:layout_height="1px"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"
+                        android:textColor="@color/color_ffffff"
                         android:text="@string/背景图片"
                         android:layout_height="wrap_content"/>
 

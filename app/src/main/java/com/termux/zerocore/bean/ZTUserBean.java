@@ -25,17 +25,15 @@ public class ZTUserBean {
     private boolean isInternalPassage = false;
     //在线服务器设定本地保存
     private String mServerJsonString;
-    // LLM 本地蓝色连接字点击
+    // deepseek 本地蓝色连接字点击
     private String mCommandLink;
 
-    // LLM api Key (字段名保留，Gson序列化兼容)
+    //DeepSeek api Key
     private String mDeepSeekApiKey;
-    // LLM url (字段名保留，Gson序列化兼容)
+    // DeepSeek url
     private String mDeepSeekApiUrl;
-    // 是否让AI看见你的终端? (字段名保留，Gson序列化兼容)
+    // 是否让DeepSeek 看见你的终端?
     private boolean mIsDeepSeekVisibleTerminal;
-    // 自定义AI系统提示语
-    private String mCustomSystemPrompt;
     // 是否折叠菜单
     private boolean isCloseFoldMenu;
     // 是否禁用主菜单配置文件
@@ -44,6 +42,97 @@ public class ZTUserBean {
     private boolean isHideGuideLayout;
     // 是否写入过菜单背景
     private boolean isWriterMenuBack;
+
+    // LLM api Key (字段名保留，Gson序列化兼容)
+    private String mCustomApiKey;
+    // LLM url (字段名保留，Gson序列化兼容)
+    private String mCustomApiUrl;
+    private boolean mIsCustomVisibleTerminal;
+    // 选择AI
+    private boolean mIsCustomAi;
+    // 是否显示左/右侧背景图片
+    private boolean mIsBackMenuVisible;
+    // 是否在内部存储/Android/data创建文件
+    private boolean isCreateFolderForSdcardAndroid;
+    // 是否跳过引导页面
+    private boolean isJumpGuide;
+    // 双击终端功能
+    private int mDoubleClickFun;
+
+    public int getDoubleClickFun() {
+        return mDoubleClickFun;
+    }
+
+    public void setDoubleClickFun(int doubleClickFun) {
+        this.mDoubleClickFun = doubleClickFun;
+    }
+
+    public boolean isJumpGuide() {
+        return isJumpGuide;
+    }
+
+    public void setJumpGuide(boolean jumpGuide) {
+        isJumpGuide = jumpGuide;
+    }
+
+    public boolean isCreateFolderForSdcardAndroid() {
+        return isCreateFolderForSdcardAndroid;
+    }
+
+    public void setCreateFolderForSdcardAndroid(boolean createFolderForSdcard) {
+        isCreateFolderForSdcardAndroid = createFolderForSdcard;
+    }
+
+    public boolean isBackMenuVisible() {
+        return mIsBackMenuVisible;
+    }
+
+    public void setIsBackMenuVisible(boolean isBackMenuVisible) {
+        this.mIsBackMenuVisible = isBackMenuVisible;
+    }
+
+    public boolean isCustomAi() {
+        return mIsCustomAi;
+    }
+
+    public void setCustomAi(boolean deepSeekAi) {
+        mIsCustomAi = deepSeekAi;
+    }
+
+    public boolean isIsCustomVisibleTerminal() {
+        return mIsCustomVisibleTerminal;
+    }
+
+    public void setIsCustomVisibleTerminal(boolean isCustomVisibleTerminal) {
+        this.mIsCustomVisibleTerminal = isCustomVisibleTerminal;
+    }
+
+    // 自定义AI系统提示语
+    private String mCustomSystemPrompt;
+
+    public String getCustomSystemPrompt() {
+        return mCustomSystemPrompt;
+    }
+
+    public void setCustomSystemPrompt(String customSystemPrompt) {
+        this.mCustomSystemPrompt = customSystemPrompt;
+    }
+
+    public String getCustomApiKey() {
+        return mCustomApiKey;
+    }
+
+    public void setCustomApiKey(String customApiKey) {
+        this.mCustomApiKey = customApiKey;
+    }
+
+    public String getCustomApiUrl() {
+        return mCustomApiUrl;
+    }
+
+    public void setCustomApiUrl(String customApiUrl) {
+        this.mCustomApiUrl = customApiUrl;
+    }
 
     public boolean isWriterMenuBack() {
         return isWriterMenuBack;
@@ -77,36 +166,52 @@ public class ZTUserBean {
         isCloseFoldMenu = foldMenu;
     }
 
-    public boolean isIsLlmVisibleTerminal() {
+    public boolean isIsDeepSeekVisibleTerminal() {
         return mIsDeepSeekVisibleTerminal;
     }
 
-    public void setIsLlmVisibleTerminal(boolean mIsDeepSeekVisibleTerminal) {
+    public void setIsDeepSeekVisibleTerminal(boolean mIsDeepSeekVisibleTerminal) {
         this.mIsDeepSeekVisibleTerminal = mIsDeepSeekVisibleTerminal;
     }
 
-    public String getCustomSystemPrompt() {
-        return mCustomSystemPrompt;
+    public boolean isIsLlmVisibleTerminal() {
+        return isIsDeepSeekVisibleTerminal();
     }
 
-    public void setCustomSystemPrompt(String customSystemPrompt) {
-        this.mCustomSystemPrompt = customSystemPrompt;
+    public void setIsLlmVisibleTerminal(boolean isLlmVisibleTerminal) {
+        setIsDeepSeekVisibleTerminal(isLlmVisibleTerminal);
     }
 
-    public String getLlmApiUrl() {
+    public String getDeepSeekApiUrl() {
         return mDeepSeekApiUrl;
     }
 
-    public void setLlmApiUrl(String mDeepSeekApiUrl) {
+    public void setDeepSeekApiUrl(String mDeepSeekApiUrl) {
         this.mDeepSeekApiUrl = mDeepSeekApiUrl;
     }
 
-    public String getLlmApiKey() {
+    public String getLlmApiUrl() {
+        return getDeepSeekApiUrl();
+    }
+
+    public void setLlmApiUrl(String llmApiUrl) {
+        setDeepSeekApiUrl(llmApiUrl);
+    }
+
+    public String getDeepSeekApiKey() {
         return mDeepSeekApiKey;
     }
 
-    public void setLlmApiKey(String mDeepSeekApiKey) {
+    public void setDeepSeekApiKey(String mDeepSeekApiKey) {
         this.mDeepSeekApiKey = mDeepSeekApiKey;
+    }
+
+    public String getLlmApiKey() {
+        return getDeepSeekApiKey();
+    }
+
+    public void setLlmApiKey(String llmApiKey) {
+        setDeepSeekApiKey(llmApiKey);
     }
 
     public String getCommandLink() {

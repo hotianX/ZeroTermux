@@ -21,6 +21,7 @@ import com.termux.R
 import com.termux.shared.logger.Logger
 import com.termux.zerocore.activity.ImageActivity
 import com.termux.zerocore.data.UsbFileData
+import com.termux.zerocore.ftp.utils.UserSetManage
 import com.termux.zerocore.url.FileUrl
 import com.termux.zerocore.utils.FileIOUtils
 import java.io.File
@@ -39,9 +40,11 @@ class BeautifySettingDialog : BaseDialogDown {
     private var show1:ImageView? = null
     private var show2:ImageView? = null
     private var mOnTextCheckedChangeListener:OnTextCheckedChangeListener? = null
+    private var mOnMenuBackListener:OnMenuBackListener? = null
     private var mOnChangeImageFile:OnChangeImageFile? = null
     private var back_ap: Switch? = null
     private var back_text_show_switch: Switch? = null
+    private var mBackMenuVisible: Switch? = null
 
     private val MAX_ALPHA:Int = 255
     private val MIN_ALPHA:Int = 40
@@ -60,6 +63,7 @@ class BeautifySettingDialog : BaseDialogDown {
         back_color = mView.findViewById(R.id.back_color)
         mFontColorAp = mView.findViewById(R.id.font_color_ap)
         back_color_ap = mView.findViewById(R.id.back_color_ap)
+        mBackMenuVisible = mView.findViewById(R.id.back_menu_visible)
         show1 = mView.findViewById(R.id.show1)
         show2 = mView.findViewById(R.id.show2)
         img_rl = mView.findViewById(R.id.img_rl)
@@ -75,6 +79,7 @@ class BeautifySettingDialog : BaseDialogDown {
         val back_color_progress = SaveData.getStringOther("back_color_progress")
         val change_text = SaveData.getStringOther("change_text")
         val change_text_show = SaveData.getStringOther("change_text_show")
+
         if(!(stringOther == null || stringOther.isEmpty() || stringOther == "def")){
             try {
                 val toInt = stringOther.toInt()
@@ -93,7 +98,7 @@ class BeautifySettingDialog : BaseDialogDown {
         }
         back_ap?.isChecked = !(change_text == null || change_text.isEmpty() || change_text == "def")
         back_text_show_switch?.isChecked = (change_text_show == null || change_text_show.isEmpty() || change_text_show == "def")
-
+        mBackMenuVisible?.isChecked = UserSetManage.get().getZTUserBean().isBackMenuVisible
         val fileImg = File("${FileUrl.mainConfigImg}/back.jpg")
         Log.e(LOG_TAG, "initProgress: check jpg exists: " + fileImg.exists())
         if(fileImg.exists()){
@@ -161,6 +166,13 @@ class BeautifySettingDialog : BaseDialogDown {
 
         }
 
+        mBackMenuVisible?.setOnCheckedChangeListener { button, bool ->
+            val ztUserBean = UserSetManage.get().getZTUserBean()
+            ztUserBean.setIsBackMenuVisible(bool)
+            UserSetManage.get().setZTUserBean(ztUserBean)
+            mOnMenuBackListener?.onChange()
+        }
+
         img_rl?.setOnClickListener {
             val intent = Intent(mContext as Activity, ImageActivity::class.java)
             intent.action = ImageActivity.ImageActivityFlgh.IMAGE_FLGH
@@ -222,6 +234,9 @@ class BeautifySettingDialog : BaseDialogDown {
         this.mOnTextCheckedChangeListener = mOnTextCheckedChangeListener
     }
 
+    public fun setOnMenuBackListener(onMenuBackListener: OnMenuBackListener) {
+        this.mOnMenuBackListener = onMenuBackListener
+    }
     public fun setOnChangeImageFile(mOnChangeImageFile:OnChangeImageFile){
         this.mOnChangeImageFile = mOnChangeImageFile
     }
@@ -254,15 +269,15 @@ class BeautifySettingDialog : BaseDialogDown {
     }
 
     public interface OnTextCheckedChangeListener{
-
         fun onChange(change:Boolean)
-
-
     }
 
     override fun getContentView(): Int {
-
         return R.layout.dialog_beauify
+    }
+
+    public interface OnMenuBackListener {
+        fun onChange()
     }
 
 }

@@ -1343,6 +1343,52 @@
     <string name="llm_input_key_error_info_500">可能的问题:\n\n返回500，AI 服务商服务器内部故障，解决方法：请等待后重试。若问题一直存在，请联系对应服务商解决。</string>
     <string name="llm_input_key_error_info_503">可能的问题:\n\n返回503，服务器负载过高，解决方法：请稍后重试您的请求。</string>
     <string name="llm_input_key_error_info_other">可能的问题:\n\n返回未能识别的 code，服务器可能本次请求断开了？，解决方法：请稍后重试您的请求。</string>
+    <string name="back_menu_visible">左/右栏目显示背景图片</string>
+    <string name="back_menu_visible_summary">你必须确保路径:\n~Ztinfo/menuBack/\n路径下有 left.png 以及 right.png</string>
+
+    <string name="guide_zerotermux_settings_agreement">ZeroTermux 使用协议</string>
+    <string name="guide_zerotermux_previous">返回</string>
+    <string name="guide_zerotermux_next">继续</string>
+    <string name="guide_zerotermux_usage_habits">使用习惯</string>
+    <string name="guide_zerotermux_usage_habits_summary">选择你的使用习惯:\n
+         \n
+        Termux:\n
+        1.双击滑动禁止显示工具箱\n
+        2.音量上下键不弹出左右菜单栏\n
+        \n
+        ZeroTermux: \n
+        1.双击滑动弹出工具箱(可能与放大缩小字体发生冲突)\n
+        2.音量上下键则是弹出左右菜单栏
+        \n
+        \n
+        如果后续需要更改使用习惯，可在主页面的左侧栏进入设置来调整
+    </string>
+    <string name="guide_zerotermux_create_folder">创建文件夹</string>
+    <string name="guide_zerotermux_create_folder_summary"> ZeroTermux 需要在你的内部存储创建以下文件夹\n\n
+        如果看不懂可直接点击 “继续” \n\n
+        建议：一般情况下请放到 内部存储，如果放到 Android/data 目录下卸载应用之后所有保存的数据包以及其他所有xinhao文件夹下的数据都会被清空请谨慎选择\n\n
+        注意：设置 内部存储/Android/data 下可能会有未知问题，如有遇到请在GITHUB上反馈\n
+        Android规范(/内部存储/Android/data/com.termux/files/xinhao/)\n
+        简单易用(/内部存储/xinhao)\n\n
+        目录说明 data(备份包)、apk(临时APK)、windows(qemu目录)、
+        command(命令目录)、font(字体目录)、iso(镜像目录)、mysql(mysql临时文件)
+        online_system(离线termux包)、qemu(qemu目录)、server(server目录)、share(分享目录)、web_config(web临时目录)\n\n
+        如果后期需要更改目录，可在 ZeroTermux 设置当中重新修改, 需注意：两个目录下的数据是分开显示的
+    </string>
+    <string name="guide_zerotermux_create_sdcard">内部存储</string>
+    <string name="guide_zerotermux_create_android">(不可用)内部存储/Android/data</string>
+    <string name="guide_zerotermux_create_toast_ok">已成功创建</string>
+    <string name="guide_zerotermux_create_toast_no">未创建成功,请检查你的权限情况</string>
+    <string name="guide_zerotermux_create_toast_created">当前功能在此版本不可用,等下个版本测试上线</string>
+    <string name="install_zerotermux_os_title">安装OS</string>
+    <string name="install_zerotermux_os_summary">ZeroTermux 正在安装基础环境,请稍等…</string>
+    <string name="loading_zerotermux">正在载入 ZeroTermux, 请稍后…</string>
+    <string name="settings_keyword">设置双击功能</string>
+    <string name="settings_keyword_summary">设置双击终端功能,选择 自定义命令、键盘、禁用</string>
+    <string name="settings_keyword_summary1">当前选择</string>
+    <string name="settings_keyword_item1">键盘</string>
+    <string name="settings_keyword_item2">禁用</string>
+    <string name="settings_keyword_item3">自定义命令</string>
 </resources>
 
 

@@ -18,11 +18,12 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 
-class ZTInstallActivity : AppCompatActivity(), View.OnClickListener {
+class ZTInstallActivity : BaseTitleActivity(), View.OnClickListener {
     private val TAG = "ZTInstallActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ztinstall)
+        setBaseTitle(UUtils.getString(R.string.zt_install))
         findViewById<CardView>(R.id.api).setOnClickListener(this)
         findViewById<CardView>(R.id.boot).setOnClickListener(this)
         findViewById<CardView>(R.id.styling).setOnClickListener(this)

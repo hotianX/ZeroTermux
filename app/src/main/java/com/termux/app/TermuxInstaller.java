@@ -25,6 +25,7 @@ import com.termux.shared.android.PackageUtils;
 import com.termux.shared.termux.TermuxConstants;
 import com.termux.shared.termux.TermuxUtils;
 import com.termux.shared.termux.shell.command.environment.TermuxShellEnvironment;
+import com.termux.zerocore.dialog.LoadingOsInstallDialog;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -120,8 +121,11 @@ public final class TermuxInstaller {
         } else if (FileUtils.fileExists(TERMUX_PREFIX_DIR_PATH, false)) {
             Logger.logInfo(LOG_TAG, "The termux prefix directory \"" + TERMUX_PREFIX_DIR_PATH + "\" does not exist but another file exists at its destination.");
         }
-
-        final ProgressDialog progress = ProgressDialog.show(activity, null, activity.getString(R.string.bootstrap_installer_body), true, false);
+        // ZeroTermux modify {@
+        //final ProgressDialog progress = ProgressDialog.show(activity, null, activity.getString(R.string.bootstrap_installer_body), true, false);
+        final LoadingOsInstallDialog loadingOsInstallDialog = new LoadingOsInstallDialog(activity);
+        loadingOsInstallDialog.show();
+        // @}
         new Thread() {
             @Override
             public void run() {
@@ -188,7 +192,11 @@ public final class TermuxInstaller {
                                 String zipEntryName = zipEntry.getName();
                                 File targetFile = new File(TERMUX_STAGING_PREFIX_DIR_PATH, zipEntryName);
                                 boolean isDirectory = zipEntry.isDirectory();
-
+                                // ZeroTermux add {@
+                                UUtils.runOnUIThread(() -> {
+                                    loadingOsInstallDialog.setMsg(zipEntryName);
+                                });
+                                // @}
                                 error = ensureDirectoryExists(isDirectory ? targetFile : targetFile.getParentFile());
                                 if (error != null) {
                                     showBootstrapErrorDialog(activity, whenDone, Error.getErrorMarkdownString(error));
@@ -236,7 +244,10 @@ public final class TermuxInstaller {
                 } finally {
                     activity.runOnUiThread(() -> {
                         try {
-                            progress.dismiss();
+                            // ZeroTermux modify {@
+                            loadingOsInstallDialog.dismiss();
+                            // progress.dismiss();
+                            // @}
                         } catch (RuntimeException e) {
                             // Activity already dismissed - ignore.
                         }

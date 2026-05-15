@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/guide_layout"
+    android:background="@color/md_black_900"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
@@ -26,6 +27,14 @@
             android:layout_height="match_parent"/>
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="80dp"
+        android:src="@drawable/ic_info"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/guide_content"
+        android:layout_marginBottom="10dp"
+        android:layout_height="80dp"/>
+
     <TextView
         android:id="@+id/guide_content"
         android:layout_width="wrap_content"
@@ -42,6 +51,8 @@
         android:layout_marginRight="10dp"
         android:textColor="@color/color_FFFFFF"
         android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp"
         android:layout_height="wrap_content"/>
 </RelativeLayout>

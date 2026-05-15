@@ -28,7 +28,7 @@ import com.zp.z_file.util.ZFileUUtils;
 
 import java.io.File;
 
-public class ZeroTermuxX11Settings extends AppCompatActivity {
+public class ZeroTermuxX11Settings extends BaseTitleActivity {
     // 内部通道
     private CardView internal_passage;
     // 外部通道
@@ -45,6 +45,7 @@ public class ZeroTermuxX11Settings extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_zero_termux_x11_settings);
+        setBaseTitle(UUtils.getString(R.string.x11_features_settings));
         internal_passage = findViewById(R.id.internal_passage);
         external_channels = findViewById(R.id.external_channels);
         x11_settings_title = findViewById(R.id.x11_settings_title);

@@ -126,6 +126,7 @@ import com.termux.zerocore.llm.markdown.MarkDownAPI;
 import com.termux.zerocore.dialog.BeautifySettingDialog;
 import com.termux.zerocore.dialog.CommonCommandsDialog;
 import com.termux.zerocore.dialog.DownLoadDialogBoom;
+import com.termux.zerocore.dialog.KeyWordFunDialog;
 import com.termux.zerocore.dialog.LoadingDialog;
 import com.termux.zerocore.dialog.ProtocolDialog;
 import com.termux.zerocore.dialog.SwitchDialog;
@@ -140,7 +141,6 @@ import com.termux.zerocore.utils.BitmapUtils;
 import com.termux.zerocore.utils.FileHttpUtils;
 import com.termux.zerocore.utils.FileIOUtils;
 import com.termux.zerocore.utils.IsInstallCommand;
-import com.termux.zerocore.utils.MenuBackConfigUtils;
 import com.termux.zerocore.utils.PhoneUtils;
 import com.termux.zerocore.utils.SingletonCommunicationUtils;
 import com.termux.zerocore.utils.SmsUtils;
@@ -1308,12 +1308,6 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         }
 
         mTerminalView.setDoubleClickListener(this);
-        String xieyi = SaveData.INSTANCE.getStringOther("xieyi");
-        if (xieyi == null || xieyi.isEmpty() || xieyi.equals("def")) {
-            ProtocolDialog protocolDialog = new ProtocolDialog(this);
-            protocolDialog.show();
-            protocolDialog.setCancelable(false);
-        }
         getServiceVs();
         main_card.setOnClickListener(
             v -> startActivity(new Intent(TermuxActivity.this, ZtSettingsActivity.class)));
@@ -1532,8 +1526,19 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
             return;
         }
         BoomWindow.SWITCH = false;
-        hideKeyboard();
-        UUtils.getHandler().postDelayed(() -> showBoomDialog(), 100);
+        showDoubleClickFun();
+    }
+
+    private void showDoubleClickFun() {
+        int doubleClickFun = UserSetManage.Companion.get().getZTUserBean().getDoubleClickFun();
+        if (doubleClickFun == KeyWordFunDialog.DOUBLE_CLICK_CUSTOM_COMMAND) {
+            hideKeyboard();
+            UUtils.getHandler().postDelayed(() -> showBoomDialog(), 100);
+        } else if (doubleClickFun == KeyWordFunDialog.DOUBLE_CLICK_KEYWORD) {
+            showKeyBord();
+        } else if (doubleClickFun == KeyWordFunDialog.DOUBLE_CLICK_NOTHING) {
+            // 什么都不做
+        }
     }
 
     private void showBoomDialog() {
@@ -1671,102 +1676,6 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         }
         if (msg.equals("right")) {
             getDrawer().smoothRightOpen();
-        }
-    }
-
-    //创建目录
-    private void createFiles() {
-
-        if (!FileUrl.INSTANCE.getZeroTermuxHome().exists()) {
-            /**
-             *
-             * 防止某些手机重复显示此Dialog
-             *
-             *
-             */
-            String sdcard_xinhao = SaveData.INSTANCE.getStringOther("sdcard_xinhao");
-            if (sdcard_xinhao == null || sdcard_xinhao.isEmpty() || sdcard_xinhao.equals("def")) {
-                SaveData.INSTANCE.saveStringOther("sdcard_xinhao", "true");
-                SwitchDialog switchDialog2 = switchDialogShow(UUtils.getString(R.string.警告), UUtils.getString(R.string.需要在您的手机));
-                switchDialog2.getCancel().setOnClickListener(v -> {
-                    switchDialog2.dismiss();
-                    finish();
-                });
-                switchDialog2.setCancelable(false);
-                switchDialog2.getOk().setOnClickListener(v -> {
-                    switchDialog2.dismiss();
-                    XXPermissions.with(TermuxActivity.this)
-                        .permission(Permission.WRITE_EXTERNAL_STORAGE)
-                        .permission(Permission.READ_EXTERNAL_STORAGE)
-                        .request(new OnPermissionCallback() {
-
-                            @Override
-                            public void onGranted(List<String> permissions, boolean all) {
-                                if (all) {
-
-                                    if (!FileUrl.INSTANCE.getZeroTermuxHome().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxHome().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxData().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxData().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxApk().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxApk().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxWindows().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxWindows().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxCommand().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxCommand().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxFont().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxFont().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxIso().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxIso().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxMysql().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxMysql().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxOnlineSystem().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxOnlineSystem().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxQemu().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxQemu().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxServer().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxServer().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxShare().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxShare().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxSystem().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxSystem().mkdirs();
-                                    }
-                                    if (!FileUrl.INSTANCE.getZeroTermuxWebConfig().exists()) {
-                                        FileUrl.INSTANCE.getZeroTermuxWebConfig().mkdirs();
-                                    }
-                                    UUtils.showMsg("ok");
-                                } else {
-
-                                    UUtils.showMsg("无权限");
-                                }
-                            }
-
-                            @Override
-                            public void onDenied(List<String> permissions, boolean never) {
-                                if (never) {
-                                    UUtils.showMsg("无权限");
-                                    // 如果是被永久拒绝就跳转到应用权限系统设置页面
-                                    XXPermissions.startPermissionActivity(TermuxActivity.this, permissions);
-                                } else {
-                                    UUtils.showMsg("无权限");
-                                }
-                            }
-                        });
-                });
-            } else {
-            }
         }
     }
 
@@ -1968,6 +1877,12 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 UUtils.writerFile("back/right.png", FileIOUtils.INSTANCE.getRightMenuBackFile());
                 UUtils.writerFile("back/info.txt", FileIOUtils.INSTANCE.getInfoMenuBackFile());
             }
+            showMenuBack();
+        });
+    }
+
+    private void showMenuBack() {
+        if (UserSetManage.Companion.get().getZTUserBean().isBackMenuVisible()) {
             UUtils.runOnUIThread(() -> {
                 // 设置左边菜单背景
                 Bitmap leftBitMap = BitmapUtils.getBitmap(FileIOUtils.INSTANCE.getLeftMenuBackFile());
@@ -1985,9 +1900,11 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 }
 
             });
-        });
+        } else {
+            mLayoutMenuAll.setBackgroundColor(getColor(R.color.color_2b2b2b));
+            mIncludeRightMenu.setBackgroundColor(getColor(R.color.color_2b2b2b));
+        }
     }
-
     private void writerMainMenuConfig(boolean cover) {
         File mainMenuXmlPathFile = FileIOUtils.INSTANCE.getMainMenuXmlPathFile();
         Locale systemLocale = getResources().getConfiguration().locale;
@@ -2175,6 +2092,9 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 double_tishi.setVisibility(View.GONE);
             }
         });
+        mBeautifySettingDialog.setOnMenuBackListener(() -> {
+            showMenuBack();
+        });
         mBeautifySettingDialog.setFontColorChange(new BeautifySettingDialog.FontColorChange() {
             @Override
             public void onColorChange(int color) {
@@ -2304,7 +2224,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         WindowUtils.setImmersionBar(TermuxActivity.this, 0.1f);
         TermuxUtils.sendTermuxOpenedBroadcast(this);
         ZeroCoreManage.initEngineManage();
-        createFiles();
+        //createFiles();
         initZeroView();
         initColorConfig();
         initStatue();

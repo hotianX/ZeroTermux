@@ -2,11 +2,14 @@ package com.termux.zerocore.settings
 
 import android.os.Bundle
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.cardview.widget.CardView
 import com.example.xh_lib.utils.UUtils
 import com.termux.R
+import com.termux.zerocore.dialog.KeyWordFunDialog
 import com.termux.zerocore.ftp.utils.UserSetManage
 import com.termux.zerocore.url.FileUrl
 import com.termux.zerocore.utils.FileHttpUtils.Companion.get
@@ -14,7 +17,7 @@ import com.topjohnwu.superuser.Shell
 import com.zp.z_file.util.LogUtils
 import java.io.File
 
-class ZeroTermuxSettingsActivity : AppCompatActivity() {
+class ZeroTermuxSettingsActivity : BaseTitleActivity() {
 
     private val ztDownloadServicesSwitch by lazy {findViewById<SwitchCompat>(R.id.zt_download_services_switch)}
     private val ztDownloadServicesLl by lazy {findViewById<LinearLayout>(R.id.zt_download_services_ll)}
@@ -46,9 +49,13 @@ class ZeroTermuxSettingsActivity : AppCompatActivity() {
     private val mainMenuConfigCloseSwitch by lazy {findViewById<SwitchCompat>(R.id.main_menu_config_close_switch)}
     private val mainMenuConfigCloseLl by lazy {findViewById<LinearLayout>(R.id.main_menu_config_close_ll)}
 
+    private val mSettingsKeywordFunCardViewLayout by lazy {findViewById<CardView>(R.id.settings_keyword_fun_card)}
+    private val mSettingsKeywordFunTextView by lazy {findViewById<TextView>(R.id.settings_keyword_fun_text_summary)}
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_zero_termux_settings)
+        setBaseTitle(UUtils.getString(R.string.zt_settings))
         initView()
         initStatus()
     }
@@ -78,6 +85,21 @@ class ZeroTermuxSettingsActivity : AppCompatActivity() {
         volumeFunctionSwitch.isChecked = ztUserBean.isResetVolume
         foldMenuCloseSwitch.isChecked = ztUserBean.isCloseFoldMenu
         mainMenuConfigCloseSwitch.isChecked = ztUserBean.isDisableMainConfigMenu
+        mSettingsKeywordFunTextView.text =
+            "${UUtils.getString(R.string.settings_keyword_summary1)}: " +
+                "${KeyWordFunDialog.getDoubleClickString(ztUserBean.doubleClickFun)}\n" +
+                "${UUtils.getString(R.string.settings_keyword_summary)}"
+        mSettingsKeywordFunCardViewLayout.setOnClickListener {
+            val keyWordFunDialog = KeyWordFunDialog(this)
+            keyWordFunDialog.show()
+            keyWordFunDialog.setOnDismissListener {
+                val ztUserBean1 = UserSetManage.get().getZTUserBean()
+                mSettingsKeywordFunTextView.text =
+                    "${UUtils.getString(R.string.settings_keyword_summary1)}: " +
+                        "${KeyWordFunDialog.getDoubleClickString(ztUserBean1.doubleClickFun)}\n" +
+                        "${UUtils.getString(R.string.settings_keyword_summary)}"
+            }
+        }
     }
 
     private fun setSwitchStatus(switchCompat: SwitchCompat, linearLayout: LinearLayout) {

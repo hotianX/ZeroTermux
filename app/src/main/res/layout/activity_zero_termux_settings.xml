@@ -18,22 +18,10 @@
             android:padding="8dp"
             android:layout_height="match_parent">
 
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:textColor="@color/color_ffffff"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:layout_marginLeft="5dp"
-                android:layout_alignParentRight="true"
-                android:text="@string/zt_settings"
-                android:layout_height="wrap_content"/>
-
-
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 app:cardElevation="0dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="5dp"
                 app:cardBackgroundColor="@color/color_55000000"
                 app:cardCornerRadius="6dp"
                 android:layout_height="wrap_content">
@@ -117,11 +105,71 @@
 
             </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/settings_keyword_fun_card"
+                android:layout_width="match_parent"
+                app:cardElevation="0dp"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/color_55000000"
+                app:cardCornerRadius="6dp"
+                android:layout_height="wrap_content">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:orientation="vertical"
+                        android:layout_marginRight="70dp"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:textColor="@color/color_ffffff"
+                            android:textStyle="bold"
+                            android:textSize="15sp"
+                            android:text="@string/settings_keyword"
+                            android:layout_height="wrap_content"/>
+
+                        <TextView
+                            android:id="@+id/settings_keyword_fun_text_summary"
+                            android:layout_width="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:textColor="@color/md_grey_500"
+                            android:textStyle="bold"
+                            android:textSize="13sp"
+                            android:text="@string/settings_keyword_summary"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:orientation="vertical"
+                        android:layout_marginRight="10dp">
+                        <ImageView
+                            android:id="@+id/cancel"
+                            android:layout_width="30dp"
+                            android:src="@mipmap/up_dialog"
+                            android:padding="6dp"
+                            android:rotation="180"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="5dp"
+                            android:layout_height="30dp"/>
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 app:cardElevation="0dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 app:cardBackgroundColor="@color/color_55000000"
                 app:cardCornerRadius="6dp"
                 android:layout_height="wrap_content">
@@ -176,7 +224,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 app:cardElevation="0dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 app:cardBackgroundColor="@color/color_55000000"
                 app:cardCornerRadius="6dp"
                 android:layout_height="wrap_content">
@@ -231,7 +279,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 app:cardElevation="0dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 app:cardBackgroundColor="@color/color_55000000"
                 app:cardCornerRadius="6dp"
                 android:layout_height="wrap_content">

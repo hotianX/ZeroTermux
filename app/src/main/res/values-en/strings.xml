@@ -1331,4 +1331,50 @@ cd ~ &amp;&amp; pkg update -y \n
     <string name="llm_input_key_error_info_500">Possible issues: returned 500, the AI provider server has an internal error. Please wait and try again. If the problem persists, contact the provider.</string>
     <string name="llm_input_key_error_info_503">Possible issues: returned 503, server load is too high. Please retry your request later.</string>
     <string name="llm_input_key_error_info_other">Possible issues:\n\nReturned an unrecognized code. The server may have dropped this request. Please retry your request later.</string>
+    <string name="back_menu_visible">Left/Right panel displays background image</string>
+    <string name="back_menu_visible_summary">You must ensure that the following path:\n~Ztinfo/menuBack/\ncontains left.png and right.png</string>
+
+    <string name="guide_zerotermux_settings_agreement">ZeroTermux Terms of Use</string>
+    <string name="guide_zerotermux_previous">Back</string>
+    <string name="guide_zerotermux_next">Continue</string>
+    <string name="guide_zerotermux_usage_habits">Usage Habits</string>
+    <string name="guide_zerotermux_usage_habits_summary">Select your usage habits:\n
+         \n
+        Termux:\n
+        1. Disable double-tap sliding to show the toolbox\n
+        2. Volume up/down keys do not open the left/right panel\n
+        \n
+        ZeroTermux: \n
+        1. Double-tap sliding opens the toolbox (may conflict with font zoom)\n
+        2. Volume up/down keys open the left/right panel
+        \n
+        \n
+        You can change usage habits later from settings in the left panel on the main page
+    </string>
+    <string name="guide_zerotermux_create_folder">Create Folder</string>
+    <string name="guide_zerotermux_create_folder_summary"> ZeroTermux needs to create the following folders in your internal storage\n\n
+        If you do not understand this, tap Continue directly \n\n
+        Recommendation: normally use internal storage. If you put it under Android/data, all saved packages and other data under the xinhao folder will be cleared after uninstalling the app. Choose carefully.\n\n
+        Note: using Internal storage/Android/data may have unknown issues. If you encounter problems, report them on GitHub.\n
+        Android standard (/Internal storage/Android/data/com.termux/files/xinhao/)\n
+        Simple and easy (/Internal storage/xinhao)\n\n
+        Directory description: data (backup packages), apk (temporary APK), windows (qemu directory),
+        command (command directory), font (font directory), iso (image directory), mysql (mysql temporary files),
+        online_system (offline termux packages), qemu (qemu directory), server (server directory), share (share directory), web_config (web temporary directory)\n\n
+        If you need to change the directory later, modify it in ZeroTermux settings. Note: data in the two directories is displayed separately.
+    </string>
+    <string name="guide_zerotermux_create_sdcard">Internal Storage</string>
+    <string name="guide_zerotermux_create_android">(NotAvailable)Internal Storage/Android/data</string>
+    <string name="guide_zerotermux_create_toast_ok">Successfully created</string>
+    <string name="guide_zerotermux_create_toast_no">Creation failed, please check your permissions</string>
+    <string name="guide_zerotermux_create_toast_created">The current feature is not available in this version, wait for the next version to be tested online</string>
+    <string name="install_zerotermux_os_title">Install OS</string>
+    <string name="install_zerotermux_os_summary">ZeroTermux is installing the basic environment, please wait…</string>
+    <string name="loading_zerotermux">Loading ZeroTermux, please wait…</string>
+    <string name="settings_keyword">Set double-tap function</string>
+    <string name="settings_keyword_summary">Set double-tap terminal function, choose Custom command, Keyboard, Disable</string>
+    <string name="settings_keyword_summary1">Current selection</string>
+    <string name="settings_keyword_item1">Keyboard</string>
+    <string name="settings_keyword_item2">Disable</string>
+    <string name="settings_keyword_item3">Custom command</string>
 </resources>

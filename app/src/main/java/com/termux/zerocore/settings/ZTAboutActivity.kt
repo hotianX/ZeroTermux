@@ -6,10 +6,11 @@ import androidx.cardview.widget.CardView
 import com.example.xh_lib.utils.UUtils
 import com.termux.R
 
-class ZTAboutActivity : AppCompatActivity() {
+class ZTAboutActivity : BaseTitleActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ztabout)
+        setBaseTitle(UUtils.getString(R.string.zt_about))
         findViewById<CardView>(R.id.zt_termux_github_card_view).setOnClickListener {
             UUtils.startUrl("https://github.com/hanxinhao000/ZeroTermux")
         }
