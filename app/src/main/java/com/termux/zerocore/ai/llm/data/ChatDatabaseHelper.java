@@ -163,7 +163,7 @@ public class ChatDatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROVIDER_NAME, "DeepSeek");
         values.put(COLUMN_FORMAT_TYPE, "openai");
-        values.put(COLUMN_API_URL, "https://api.deepseek.com/chat/completions");
+        values.put(COLUMN_API_URL, "https://api.deepseek.com");
         values.put(COLUMN_API_KEY, apiKey != null ? apiKey : "");
         values.put(COLUMN_MODEL_NAME, "deepseek-chat");
         values.put(COLUMN_IS_DEFAULT, 1);

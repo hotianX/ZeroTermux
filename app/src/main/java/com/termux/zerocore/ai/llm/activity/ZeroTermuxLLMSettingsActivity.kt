@@ -55,7 +55,7 @@ class ZeroTermuxLLMSettingsActivity : BaseTitleActivity() {
     // Format type display names and values
     private val formatTypes = arrayOf("openai", "claude", "gemini")
     private val defaultUrls = mapOf(
-        "openai" to "https://api.futureppo.top/v1/chat/completions",
+        "openai" to "https://api.deepseek.com",
         "claude" to "https://api.anthropic.com/v1/messages",
         "gemini" to "https://generativelanguage.googleapis.com/v1beta"
     )

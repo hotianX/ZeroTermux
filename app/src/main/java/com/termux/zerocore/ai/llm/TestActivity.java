@@ -58,7 +58,7 @@ public class TestActivity extends AppCompatActivity {
         ProviderProfile defaultProfile = dbHelper.getDefaultProvider();
         if (defaultProfile == null) {
             defaultProfile = new ProviderProfile(0, "DeepSeek", "openai",
-                "https://api.deepseek.com/chat/completions", "", "deepseek-chat", true);
+                "https://api.deepseek.com", "", "deepseek-chat", true);
         }
         AIProvider provider = AIClient.getProvider(defaultProfile.getFormatType());
 

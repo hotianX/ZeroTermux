@@ -1199,10 +1199,10 @@ Known Issue: Rapid consecutive back operations may cause black screen in Interna
 Enter code recognition parameters separated by commas. These will appear as blue text in the DeepSeek session and can be tapped directly for terminal execution instead of long-pressing to copy. Tap here to restore defaults.</string>
     <string name="deepseek_settings_recognition_edit_keyword">Tap here to restore defaults</string>
     <string name="deepseek_settings_recognition_error_toast">Failed to format command. Please reconfigure the "Code Recognition Keywords".</string>
-    <string name="deepseek_settings_url">Enter DeepSeek API URL</string>
+    <string name="deepseek_settings_url">Enter DeepSeek API Base URL</string>
     <string name="deepseek_settings_url_edit">Enter the official key here; it will be saved automatically.</string>
     <string name="deepseek_settings_url_edit_summary">Enter the official key here; it will be saved automatically.</string>
-    <string name="deepseek_settings_url_edit_info">Currently defaults to the DeepSeek API interface. Do not modify this unless you are certain, as changes may make the interface inaccessible.</string>
+    <string name="deepseek_settings_url_edit_info">Currently defaults to the DeepSeek API base URL. Do not modify this unless you are certain, as changes may make the interface inaccessible.</string>
     <string name="deepseek_settings_key">Enter DeepSeek Key</string>
     <string name="deepseek_settings_key_edit">Enter the official key here; it will be saved automatically.</string>
     <string name="deepseek_settings_key_edit_summary">Enter the official key here; it will be saved automatically.</string>
@@ -1321,14 +1321,14 @@ cd ~ &amp;&amp; pkg update -y \n
     <string name="ai_provider_name">Name</string>
     <string name="ai_provider_name_hint">e.g., DeepSeek, OpenAI</string>
     <string name="ai_provider_format">API Format</string>
-    <string name="ai_provider_url">API URL</string>
-    <string name="ai_provider_url_hint">https://api.example.com/v1/chat/completions</string>
+    <string name="ai_provider_url">API Base URL</string>
+    <string name="ai_provider_url_hint">https://api.deepseek.com</string>
     <string name="ai_provider_key">API Key</string>
     <string name="ai_provider_key_hint">Enter your API key</string>
     <string name="ai_provider_model">Model Name</string>
     <string name="ai_provider_model_hint">e.g., deepseek-chat, gpt-4o</string>
     <string name="ai_provider_name_required">Please enter a provider name</string>
-    <string name="ai_provider_url_required">Please enter the API URL</string>
+    <string name="ai_provider_url_required">Please enter the API base URL</string>
     <string name="ai_provider_model_required">Please enter the model name</string>
     <string name="ai_provider_saved">Provider saved</string>
     <string name="ai_provider_deleted">Provider deleted</string>

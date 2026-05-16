@@ -1157,10 +1157,10 @@
     <string name="deepseek_settings_recognition_edit_keyword">点击此处恢复默认</string>
     <string name="deepseek_settings_recognition_error_toast">格式化命令失败,请重新设置 “代码识别关键字”</string>
 
-    <string name="deepseek_settings_url">输入 DeepSeek 接口地址</string>
+    <string name="deepseek_settings_url">输入 DeepSeek API 基础地址</string>
     <string name="deepseek_settings_url_edit">将官网的密钥输入到此处，将自动保存</string>
     <string name="deepseek_settings_url_edit_summary">将官网的密钥输入到此处，将自动保存</string>
-    <string name="deepseek_settings_url_edit_info">目前默认的是 DeepSeek API接口，此处不清楚的话不要随意修改，随意修改可能导致接口无法访问</string>
+    <string name="deepseek_settings_url_edit_info">目前默认的是 DeepSeek API 基础地址，此处不清楚的话不要随意修改，随意修改可能导致接口无法访问</string>
 
     <string name="deepseek_settings_key">输入 DeepSeek 密钥</string>
     <string name="deepseek_settings_key_edit">将官网的密钥输入到此处，将自动保存</string>
@@ -1281,14 +1281,14 @@
     <string name="ai_provider_name">名称</string>
     <string name="ai_provider_name_hint">例如: DeepSeek、OpenAI</string>
     <string name="ai_provider_format">API 格式</string>
-    <string name="ai_provider_url">API 地址</string>
-    <string name="ai_provider_url_hint">https://api.example.com/v1/chat/completions</string>
+    <string name="ai_provider_url">API 基础地址</string>
+    <string name="ai_provider_url_hint">https://api.deepseek.com</string>
     <string name="ai_provider_key">API 密钥</string>
     <string name="ai_provider_key_hint">输入你的 API 密钥</string>
     <string name="ai_provider_model">模型名称</string>
     <string name="ai_provider_model_hint">例如: deepseek-chat、gpt-4o</string>
     <string name="ai_provider_name_required">请输入提供者名称</string>
-    <string name="ai_provider_url_required">请输入 API 地址</string>
+    <string name="ai_provider_url_required">请输入 API 基础地址</string>
     <string name="ai_provider_model_required">请输入模型名称</string>
     <string name="ai_provider_saved">提供者已保存</string>
     <string name="ai_provider_deleted">提供者已删除</string>

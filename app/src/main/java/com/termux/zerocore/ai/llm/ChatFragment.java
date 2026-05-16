@@ -365,7 +365,7 @@ public class ChatFragment extends Fragment {
             // Fallback: use OpenAI-compatible with DeepSeek defaults
             currentProvider = AIClient.getProvider("openai");
             currentProfile = new ProviderProfile(0, "DeepSeek", "openai",
-                "https://api.deepseek.com/chat/completions",
+                "https://api.deepseek.com",
                 UserSetManage.Companion.get().getZTUserBean().getCustomApiKey(),
                 "deepseek-chat", true);
         }
