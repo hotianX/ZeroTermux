@@ -71,11 +71,17 @@ public class AIClient {
                             streamSuccessfulResponse(provider, response, listener);
                         } else {
                             String responseBody = response.body() != null ? response.body().string() : "";
-                            for (ProviderStreamEvent event : provider.parseResponseEvents(responseBody)) {
-                                listener.onStreamEvent(event);
-                                if (ProviderStreamEvent.TYPE_CONTENT_DELTA.equals(event.getType()) && event.getTextDelta() != null) {
-                                    listener.onMessage(event.getTextDelta());
+                            try {
+                                for (ProviderStreamEvent event : provider.parseResponseEvents(responseBody)) {
+                                    listener.onStreamEvent(event);
+                                    if (ProviderStreamEvent.TYPE_CONTENT_DELTA.equals(event.getType()) && event.getTextDelta() != null) {
+                                        listener.onMessage(event.getTextDelta());
+                                    }
                                 }
+                            } catch (AIProviderException e) {
+                                String errorMessage = ProviderRedaction.redact(e.getMessage());
+                                LogUtils.e(TAG, "Response parse error: " + errorMessage);
+                                listener.onError("Data error: " + errorMessage);
                             }
                             listener.onComplete();
                         }
