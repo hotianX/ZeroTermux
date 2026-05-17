@@ -122,8 +122,7 @@ import com.termux.zerocore.config.mainmenu.data.MainMenuCategoryData;
 import com.termux.zerocore.config.mainmenu.view.adapter.MainMenuAdapter;
 import com.termux.zerocore.config.other.ZTGitHubVersion;
 import com.termux.zerocore.config.ztcommand.config.XmlMenuConfig;
-import com.termux.zerocore.ai.deepseek.DeepSeekTransitFragment;
-import com.termux.zerocore.ai.deepseek.markdown.MarkDownAPI;
+import com.termux.zerocore.ai.llm.markdown.MarkDownAPI;
 import com.termux.zerocore.dialog.BeautifySettingDialog;
 import com.termux.zerocore.dialog.CommonCommandsDialog;
 import com.termux.zerocore.dialog.DownLoadDialogBoom;
@@ -1995,14 +1994,14 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
         LogUtils.e(TAG, "fragmentManager fragmentTransaction is: " + fragmentTransaction);
 
         // 1. 先移除可能存在的所有 Fragment
-        Fragment deepSeekFragment = getSupportFragmentManager()
-            .findFragmentByTag("DeepSeekTransitFragment");
+        Fragment llmFragment = getSupportFragmentManager()
+            .findFragmentByTag("LLMMainFragment");
         Fragment fileListFragment = getSupportFragmentManager()
             .findFragmentByTag("ZFileListFragment");
 
-        if (deepSeekFragment != null) {
-            fragmentTransaction.remove(deepSeekFragment);
-            LogUtils.e(TAG, "Removed existing DeepSeekTransitFragment");
+        if (llmFragment != null) {
+            fragmentTransaction.remove(llmFragment);
+            LogUtils.e(TAG, "Removed existing LLMMainFragment");
         }
 
         if (fileListFragment != null) {
@@ -2028,18 +2027,11 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 LogUtils.e(TAG, "fragmentManager switch ZFileListFragment deno. ");
                 break;
             case 1:
-                LogUtils.e(TAG, "fragmentManager switch DeepSeekTransitFragment. ");
-                boolean isCustomAi = UserSetManage.Companion.get().getZTUserBean().isCustomAi();
-                if (isCustomAi) {
-                    LLMTransitFragment llmTransitFragment = LLMTransitFragment.newInstance();
-                    fragmentTransaction.replace(R.id.frame_file, llmTransitFragment, "LLMMainFragment")
-                        .commitAllowingStateLoss();
-                } else {
-                    DeepSeekTransitFragment deepSeekTransitFragment = DeepSeekTransitFragment.newInstance();
-                    fragmentTransaction.replace(R.id.frame_file, deepSeekTransitFragment, "DeepSeekMainFragment")
-                        .commitAllowingStateLoss();
-                }
-                LogUtils.e(TAG, "fragmentManager switch DeepSeekTransitFragment deno. ");
+                LogUtils.e(TAG, "fragmentManager switch unified LLMTransitFragment. ");
+                LLMTransitFragment llmTransitFragment = LLMTransitFragment.newInstance();
+                fragmentTransaction.replace(R.id.frame_file, llmTransitFragment, "LLMMainFragment")
+                    .commitAllowingStateLoss();
+                LogUtils.e(TAG, "fragmentManager switch unified LLMTransitFragment done. ");
                 break;
         }
         ZTConfig.INSTANCE.setCloseListener(() -> getDrawer().smoothClose());

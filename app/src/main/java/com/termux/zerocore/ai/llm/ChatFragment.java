@@ -32,6 +32,8 @@ import com.termux.zerocore.ai.llm.model.Config;
 import com.termux.zerocore.ai.llm.model.RequestMessageItem;
 import com.termux.zerocore.ai.model.AIClient;
 import com.termux.zerocore.ai.model.ProviderProfile;
+import com.termux.zerocore.ai.model.ProviderProfileContract;
+import com.termux.zerocore.ai.model.ProviderStreamEvent;
 import com.termux.zerocore.ai.provider.AIProvider;
 import com.termux.zerocore.ftp.utils.UserSetManage;
 
@@ -55,7 +57,6 @@ public class ChatFragment extends Fragment {
     private List<ProviderProfile> providerList = new ArrayList<>();
     private Spinner providerSpinner;
     private List<RequestMessageItem> requestMessageItemList = new ArrayList<>();
-    private static ChatFragment chatFragment;
 
     private TextView testText;
 
@@ -71,16 +72,7 @@ public class ChatFragment extends Fragment {
     private boolean createS = false;
 
     public static ChatFragment newInstance() {
-        if (chatFragment == null) {
-            synchronized (ChatFragment.class) {
-                if (chatFragment == null) {
-                    chatFragment = new ChatFragment();
-                }
-                return chatFragment;
-            }
-        } else {
-            return chatFragment;
-        }
+        return new ChatFragment();
     }
 
     @Nullable
@@ -200,10 +192,14 @@ public class ChatFragment extends Fragment {
     }
 
     StringBuilder mText = new StringBuilder();
+    StringBuilder mReasoningText = new StringBuilder();
+    StringBuilder mToolCallsText = new StringBuilder();
 
     private void reqModel(String text) {
         // Clear mText at start to prevent stale data from previous errors
         mText.setLength(0);
+        mReasoningText.setLength(0);
+        mToolCallsText.setLength(0);
 
         requestMessageItemList.add(new RequestMessageItem(RequestMessageItem.ROLE_USER, text));
 
@@ -224,6 +220,7 @@ public class ChatFragment extends Fragment {
 
                 @Override
                 public void onMessage(String content) {
+                    // AIClient emits only assistant content deltas here; reasoning/tool events are handled separately.
                     LogUtils.e(TAG, "onMessage content: " + content);
                     mText.append(content);
                     UUtils.runOnUIThread(() -> {
@@ -233,17 +230,45 @@ public class ChatFragment extends Fragment {
                 }
 
                 @Override
+                public void onStreamEvent(ProviderStreamEvent event) {
+                    if (event == null) return;
+                    if (ProviderStreamEvent.TYPE_REASONING_DELTA.equals(event.getType()) && event.getReasoningDelta() != null) {
+                        mReasoningText.append(event.getReasoningDelta());
+                        UUtils.runOnUIThread(() -> localProcessingReasoning(event.getReasoningDelta()));
+                    } else if (ProviderStreamEvent.TYPE_TOOL_CALL_DELTA.equals(event.getType())) {
+                        String toolDisplay = formatToolEvent(event);
+                        mToolCallsText.append(toolDisplay);
+                        UUtils.runOnUIThread(() -> localProcessingToolCall(toolDisplay));
+                    }
+                }
+
+                @Override
                 public void onComplete() {
                     input();
                     LogUtils.e(TAG, "onComplete mText: " + mText);
-                    if (mText.length() > 0) {
+                    if (mText.length() > 0 || mReasoningText.length() > 0 || mToolCallsText.length() > 0) {
                         UUtils.runOnUIThread(() -> {
                             String msg = mText.toString();
+                            String reasoning = mReasoningText.toString();
+                            String tools = mToolCallsText.toString();
                             LogUtils.e(TAG, "onComplete insertMessage sessionId: " + sessionId + " ,msg: " + msg);
-                            dbHelper.insertMessage(sessionId, msg, false, System.currentTimeMillis(), 1);
+                            if (!messages.isEmpty() && !newMsg) {
+                                ChatMessage streamed = messages.get(messages.size() - 1);
+                                if (!msg.equals(streamed.getMessageText())) {
+                                    streamed.setMessageText(msg);
+                                }
+                            } else {
+                                messages.add(new ChatMessage(msg, false, System.currentTimeMillis(), 1, reasoning, tools));
+                                adapter.notifyItemInserted(messages.size() - 1);
+                            }
+                            dbHelper.insertMessage(sessionId, msg, false, System.currentTimeMillis(), 1, reasoning, tools);
                             requestMessageItemList.add(new RequestMessageItem(RequestMessageItem.ROLE_ASSISTANT, msg));
+                            adapter.notifyItemChanged(messages.size() - 1);
                             mText.delete(0, mText.length());
+                            mReasoningText.delete(0, mReasoningText.length());
+                            mToolCallsText.delete(0, mToolCallsText.length());
                             newMsg = true;
+                            scrollToBottom();
                         });
                     }
                 }
@@ -273,18 +298,45 @@ public class ChatFragment extends Fragment {
             + " ,isError: " + isError
             + " ,msg: " + msg
         );
-        if (newMsg || isError) {
-            messages.add(new ChatMessage(msg, false, System.currentTimeMillis(), 1));
+        ensureAssistantMessage(isError ? msg : "", isError);
+        if (!isError && msg != null && !msg.isEmpty()) {
+            adapter.updateMessageText(messages.size() - 1, msg);
+        }
+        scrollToBottom();
+    }
+
+    private void ensureAssistantMessage(String initialText, boolean isError) {
+        if (newMsg || isError || messages.isEmpty()) {
+            messages.add(new ChatMessage(initialText, false, System.currentTimeMillis(), 1));
             adapter.notifyItemInserted(messages.size() - 1);
             newMsg = false;
-        } else {
-            adapter.updateMessageText(messages.size() - 1, msg);
-            scrollToBottom();
         }
     }
 
     private void localProcessingMessage(String msg, boolean isError) {
         updateM(msg, isError);
+    }
+
+    private void localProcessingReasoning(String reasoningDelta) {
+        ensureAssistantMessage("", false);
+        adapter.updateReasoningText(messages.size() - 1, reasoningDelta);
+        scrollToBottom();
+    }
+
+    private void localProcessingToolCall(String toolDelta) {
+        ensureAssistantMessage("", false);
+        adapter.updateToolCallsText(messages.size() - 1, toolDelta);
+        scrollToBottom();
+    }
+
+    private String formatToolEvent(ProviderStreamEvent event) {
+        StringBuilder json = new StringBuilder("{");
+        if (event.getToolCallId() != null) json.append("\"id\":\"").append(event.getToolCallId()).append("\",");
+        if (event.getToolName() != null) json.append("\"name\":\"").append(event.getToolName()).append("\",");
+        if (event.getToolArgumentsDelta() != null) json.append("\"arguments_delta\":").append(event.getToolArgumentsDelta());
+        if (json.charAt(json.length() - 1) == ',') json.deleteCharAt(json.length() - 1);
+        json.append("}");
+        return "\u5de5\u5177\u8c03\u7528\uff1a" + ProviderStreamEvent.TOOL_DISPLAY_ONLY_NOTICE + "\n" + json;
     }
 
     private void initProviderSpinner() {
@@ -330,7 +382,7 @@ public class ChatFragment extends Fragment {
                 }
                 if (position >= 0 && position < providerList.size()) {
                     currentProfile = providerList.get(position);
-                    currentProvider = AIClient.getProvider(currentProfile.getFormatType());
+                    currentProvider = AIClient.getProvider(currentProfile.getProtocol());
                     // Clear conversation context when switching providers
                     requestMessageItemList.clear();
                     mText.setLength(0);
@@ -360,14 +412,11 @@ public class ChatFragment extends Fragment {
             currentProfile = dbHelper.getDefaultProvider();
         }
         if (currentProfile != null) {
-            currentProvider = AIClient.getProvider(currentProfile.getFormatType());
+            currentProvider = AIClient.getProvider(currentProfile.getProtocol());
         } else {
             // Fallback: use OpenAI-compatible with DeepSeek defaults
-            currentProvider = AIClient.getProvider("openai");
-            currentProfile = new ProviderProfile(0, "DeepSeek", "openai",
-                "https://api.deepseek.com",
-                UserSetManage.Companion.get().getZTUserBean().getCustomApiKey(),
-                "deepseek-chat", true);
+            currentProvider = AIClient.getProvider(ProviderProfileContract.LEGACY_FORMAT_OPENAI);
+            currentProfile = ProviderProfile.deepSeekDefault(UserSetManage.Companion.get().getZTUserBean().getCustomApiKey());
         }
     }
 
@@ -378,7 +427,6 @@ public class ChatFragment extends Fragment {
         if (adapter != null) {
             adapter.release();
         }
-        chatFragment = null;
     }
 
     // 获取终端助手提示语

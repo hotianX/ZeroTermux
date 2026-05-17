@@ -1278,6 +1278,12 @@
     <string name="ai_provider_edit">编辑提供者</string>
     <string name="ai_provider_delete_confirm">确定要删除提供者 \"%s\" 吗？</string>
     <string name="ai_provider_delete_last">无法删除最后一个提供者</string>
+    <string name="ai_provider_dialog_base_url_notice">只填写 API 基础地址，应用会自动拼接对话/模型端点。</string>
+    <string name="ai_provider_endpoint_preview">端点预览</string>
+    <string name="ai_format_deepseek_preset">DeepSeek（OpenAI 兼容）</string>
+    <string name="ai_provider_auth_bearer">认证：Authorization: Bearer</string>
+    <string name="ai_provider_auth_claude">认证：x-api-key + anthropic-version</string>
+    <string name="ai_provider_auth_gemini">认证：x-goog-api-key</string>
     <string name="ai_provider_name">名称</string>
     <string name="ai_provider_name_hint">例如: DeepSeek、OpenAI</string>
     <string name="ai_provider_format">API 格式</string>
@@ -1286,9 +1292,10 @@
     <string name="ai_provider_key">API 密钥</string>
     <string name="ai_provider_key_hint">输入你的 API 密钥</string>
     <string name="ai_provider_model">模型名称</string>
-    <string name="ai_provider_model_hint">例如: deepseek-chat、gpt-4o</string>
+    <string name="ai_provider_model_hint">例如: deepseek-v4-flash、gpt-4o</string>
     <string name="ai_provider_name_required">请输入提供者名称</string>
     <string name="ai_provider_url_required">请输入 API 基础地址</string>
+    <string name="ai_provider_key_required">请输入 API 密钥</string>
     <string name="ai_provider_model_required">请输入模型名称</string>
     <string name="ai_provider_saved">提供者已保存</string>
     <string name="ai_provider_deleted">提供者已删除</string>
@@ -1296,8 +1303,8 @@
     <string name="ai_provider_set_default">设为默认</string>
     <string name="ai_provider_set_default_done">已设为默认</string>
     <string name="ai_format_openai">OpenAI 兼容</string>
-    <string name="ai_format_claude">Anthropic Claude</string>
-    <string name="ai_format_gemini">Google Gemini</string>
+    <string name="ai_format_claude">Claude Messages</string>
+    <string name="ai_format_gemini">Gemini generateContent</string>
     <string name="ai_system_prompt_section">系统提示词</string>
     <string name="ai_system_prompt_hint">输入自定义系统提示词...</string>
     <string name="ai_chat_title">AI 助手</string>
@@ -1355,4 +1362,8 @@
     <string name="settings_keyword_item1">键盘</string>
     <string name="settings_keyword_item2">禁用</string>
     <string name="settings_keyword_item3">自定义命令</string>
+    <string name="ai_provider_unsupported_profile">配置包含未知协议字段，请编辑后保存。</string>
+    <string name="ai_provider_models_preview">模型端点预览</string>
+    <string name="ai_provider_model_list_manual">该协议需要手动填写模型名称。</string>
+    <string name="ai_provider_model_list_endpoint_unavailable">模型列表端点不可用。</string>
 </resources>

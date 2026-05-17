@@ -20,19 +20,9 @@ public class LLMTransitFragment extends Fragment {
     private static final String TAG = LLMTransitFragment.class.getSimpleName();
     private View mView;
     private FrameLayout mFrameLayout;
-    private static LLMTransitFragment llmTransitFragment;
 
     public static LLMTransitFragment newInstance() {
-        if (llmTransitFragment == null) {
-            synchronized (LLMTransitFragment.class) {
-                if (llmTransitFragment == null) {
-                    llmTransitFragment = new LLMTransitFragment();
-                }
-                return llmTransitFragment;
-            }
-        } else {
-            return llmTransitFragment;
-        }
+        return new LLMTransitFragment();
     }
 
     @Override
@@ -88,6 +78,5 @@ public class LLMTransitFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        llmTransitFragment = null;
     }
 }

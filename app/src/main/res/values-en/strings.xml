@@ -1318,6 +1318,12 @@ cd ~ &amp;&amp; pkg update -y \n
     <string name="ai_provider_edit">Edit Provider</string>
     <string name="ai_provider_delete_confirm">Are you sure you want to delete provider \"%s\"?</string>
     <string name="ai_provider_delete_last">Cannot delete the last provider</string>
+    <string name="ai_provider_dialog_base_url_notice">Enter only the API base URL; the app appends chat/model endpoint paths.</string>
+    <string name="ai_provider_endpoint_preview">Endpoint preview</string>
+    <string name="ai_format_deepseek_preset">DeepSeek (OpenAI Compatible)</string>
+    <string name="ai_provider_auth_bearer">Auth: Authorization: Bearer</string>
+    <string name="ai_provider_auth_claude">Auth: x-api-key + anthropic-version</string>
+    <string name="ai_provider_auth_gemini">Auth: x-goog-api-key</string>
     <string name="ai_provider_name">Name</string>
     <string name="ai_provider_name_hint">e.g., DeepSeek, OpenAI</string>
     <string name="ai_provider_format">API Format</string>
@@ -1326,9 +1332,10 @@ cd ~ &amp;&amp; pkg update -y \n
     <string name="ai_provider_key">API Key</string>
     <string name="ai_provider_key_hint">Enter your API key</string>
     <string name="ai_provider_model">Model Name</string>
-    <string name="ai_provider_model_hint">e.g., deepseek-chat, gpt-4o</string>
+    <string name="ai_provider_model_hint">e.g., deepseek-v4-flash, gpt-4o</string>
     <string name="ai_provider_name_required">Please enter a provider name</string>
     <string name="ai_provider_url_required">Please enter the API base URL</string>
+    <string name="ai_provider_key_required">Please enter the API key</string>
     <string name="ai_provider_model_required">Please enter the model name</string>
     <string name="ai_provider_saved">Provider saved</string>
     <string name="ai_provider_deleted">Provider deleted</string>
@@ -1396,4 +1403,8 @@ cd ~ &amp;&amp; pkg update -y \n
     <string name="settings_keyword_item1">Keyboard</string>
     <string name="settings_keyword_item2">Disable</string>
     <string name="settings_keyword_item3">Custom command</string>
+    <string name="ai_provider_unsupported_profile">Profile has unknown protocol fields. Edit and save it to repair.</string>
+    <string name="ai_provider_models_preview">Models endpoint preview</string>
+    <string name="ai_provider_model_list_manual">This protocol requires entering model names manually.</string>
+    <string name="ai_provider_model_list_endpoint_unavailable">Models endpoint is not available.</string>
 </resources>

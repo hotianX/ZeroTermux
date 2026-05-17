@@ -1,10 +1,10 @@
-<!-- item_chat_message_bot.xml -->
+﻿<!-- item_chat_message_bot.xml -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <com.termux.zerocore.ai.deepseek.view.CustomTextView
+    <com.termux.zerocore.ai.llm.view.CustomTextView
         android:id="@+id/messageTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,10 +16,36 @@
         android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/reasoningTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/messageTextView"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/bg_m_text"
+        android:padding="6dp"
+        android:textColor="@color/md_grey_500"
+        android:textIsSelectable="true"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/toolTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/reasoningTextView"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/bg_m_text"
+        android:padding="6dp"
+        android:textColor="@color/color_48baf3"
+        android:textIsSelectable="true"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/timeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/messageTextView"
+        android:layout_below="@id/toolTextView"
         android:layout_marginTop="2dp"
         android:paddingRight="2dp"
         android:layout_marginBottom="10dp"

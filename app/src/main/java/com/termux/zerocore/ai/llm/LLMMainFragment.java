@@ -25,7 +25,6 @@ import com.termux.zerocore.llm.activity.ZeroTermuxLLMSettingsActivity;
 import java.util.List;
 
 public class LLMMainFragment extends Fragment {
-    private static LLMMainFragment llmMainFragment;
     private RecyclerView mRecyclerView;
     private ChatSessionAdapter adapter;
     private ChatDatabaseHelper dbHelper;
@@ -36,16 +35,7 @@ public class LLMMainFragment extends Fragment {
     private LLMTransitFragment mLlmTransitFragment;
 
     public static LLMMainFragment newInstance() {
-        if (llmMainFragment == null) {
-            synchronized (LLMMainFragment.class) {
-                if (llmMainFragment == null) {
-                    llmMainFragment = new LLMMainFragment();
-                }
-                return llmMainFragment;
-            }
-        } else {
-            return llmMainFragment;
-        }
+        return new LLMMainFragment();
     }
 
     @Nullable
@@ -102,6 +92,5 @@ public class LLMMainFragment extends Fragment {
         if (adapter != null) {
             adapter.release();
         }
-        llmMainFragment = null;
     }
 }

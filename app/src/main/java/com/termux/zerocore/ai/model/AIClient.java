@@ -20,10 +20,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okio.BufferedSource;
 
-/**
- * Generic AI HTTP client that delegates request building and response parsing
- * to an AIProvider implementation.
- */
+/** Generic AI HTTP client that delegates protocol details to AIProvider. */
 public class AIClient {
     private static final String TAG = AIClient.class.getSimpleName();
 
@@ -36,87 +33,107 @@ public class AIClient {
     public interface Listener {
         void onError(String errorMessage);
         void onMessage(String content);
+        default void onStreamEvent(ProviderStreamEvent event) {}
         void onComplete();
     }
 
-    /**
-     * Look up an AIProvider by format type string.
-     */
-    public static AIProvider getProvider(String formatType) {
-        if (formatType == null) return new OpenAIProvider();
-        switch (formatType) {
-            case "claude": return new ClaudeProvider();
-            case "gemini": return new GeminiProvider();
-            default: return new OpenAIProvider();
+    public static AIProvider getProvider(String formatOrProtocol) {
+        String protocol = ProviderProfileContract.normalizeProtocol(formatOrProtocol);
+        switch (protocol) {
+            case ProviderProfileContract.PROTOCOL_CLAUDE_MESSAGES:
+                return new ClaudeProvider();
+            case ProviderProfileContract.PROTOCOL_GEMINI_GENERATE_CONTENT:
+                return new GeminiProvider();
+            case ProviderProfileContract.PROTOCOL_OPENAI_CHAT:
+            default:
+                return new OpenAIProvider();
         }
     }
 
-    /**
-     * Send a streaming request to the AI provider.
-     *
-     * @param provider     The AI provider implementation
-     * @param profile      Provider profile with URL, key, model
-     * @param messages     Conversation messages (user + assistant, no system)
-     * @param systemPrompt System prompt text
-     * @param listener     Callback for messages, errors, and completion
-     */
     public void ask(AIProvider provider, ProviderProfile profile,
                     List<RequestMessageItem> messages, String systemPrompt,
                     Listener listener) {
         try {
             Request request = provider.buildRequest(profile, messages, systemPrompt, true);
-
             sharedClient.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    LogUtils.e(TAG, "onFailure call: " + call + " ,e: " + e);
-                    e.printStackTrace();
-                    listener.onMessage("Network error: " + e.getMessage());
+                    LogUtils.e(TAG, "onFailure: " + ProviderRedaction.redact(e.getMessage()));
+                    listener.onError("Network error: " + ProviderRedaction.redact(e.getMessage()));
                     listener.onComplete();
                 }
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                    LogUtils.e(TAG, "onResponse call: " + call + " ,response: " + response);
+                    LogUtils.e(TAG, "onResponse code: " + response.code());
                     if (response.isSuccessful()) {
-                        try {
-                            BufferedSource source = response.body().source();
-                            String line;
-                            while ((line = source.readUtf8Line()) != null) {
-                                if (provider.isStreamComplete(line)) {
-                                    break;
-                                }
-                                try {
-                                    String content = provider.parseStreamChunk(line);
-                                    if (content != null && !content.isEmpty()) {
-                                        listener.onMessage(content);
-                                    }
-                                } catch (AIProviderException e) {
-                                    LogUtils.e(TAG, "Stream parse error: " + e);
-                                    // Continue reading — individual chunk errors shouldn't kill the stream
+                        if (isEventStream(response)) {
+                            streamSuccessfulResponse(provider, response, listener);
+                        } else {
+                            String responseBody = response.body() != null ? response.body().string() : "";
+                            for (ProviderStreamEvent event : provider.parseResponseEvents(responseBody)) {
+                                listener.onStreamEvent(event);
+                                if (ProviderStreamEvent.TYPE_CONTENT_DELTA.equals(event.getType()) && event.getTextDelta() != null) {
+                                    listener.onMessage(event.getTextDelta());
                                 }
                             }
-                            listener.onComplete();
-                        } catch (Exception e) {
-                            LogUtils.e(TAG, "onResponse data error: " + e);
-                            listener.onMessage("Data error: " + e.getMessage());
                             listener.onComplete();
                         }
                     } else {
                         String errorBody = "";
                         try {
                             errorBody = response.body() != null ? response.body().string() : "";
-                        } catch (Exception ignored) {
-                        }
-                        String errorMsg = provider.parseError(response.code(), errorBody);
-                        listener.onMessage(errorMsg);
+                        } catch (Exception ignored) {}
+                        String errorMsg = ProviderRedaction.redact(provider.parseError(response.code(), errorBody));
+                        listener.onError(errorMsg);
                         listener.onComplete();
                     }
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
-            listener.onMessage("Request error: " + e.getMessage());
+            LogUtils.e(TAG, "Request error: " + ProviderRedaction.redact(e.getMessage()));
+            listener.onError("Request error: " + ProviderRedaction.redact(e.getMessage()));
+            listener.onComplete();
+        }
+    }
+
+    private boolean isEventStream(Response response) {
+        String contentType = response.header("Content-Type", "");
+        return contentType != null && contentType.toLowerCase().contains("text/event-stream");
+    }
+
+    private void streamSuccessfulResponse(AIProvider provider, Response response, Listener listener) {
+        try {
+            if (response.body() == null) {
+                listener.onComplete();
+                return;
+            }
+            BufferedSource source = response.body().source();
+            String line;
+            while ((line = source.readUtf8Line()) != null) {
+                if (provider.isStreamComplete(line)) break;
+                try {
+                    List<ProviderStreamEvent> events = provider.parseStreamEvents(line);
+                    if (events.isEmpty()) {
+                        String content = provider.parseStreamChunk(line);
+                        if (content != null && !content.isEmpty()) listener.onMessage(content);
+                    } else {
+                        for (ProviderStreamEvent event : events) {
+                            listener.onStreamEvent(event);
+                            if (ProviderStreamEvent.TYPE_CONTENT_DELTA.equals(event.getType())
+                                && event.getTextDelta() != null) {
+                                listener.onMessage(event.getTextDelta());
+                            }
+                        }
+                    }
+                } catch (AIProviderException e) {
+                    LogUtils.e(TAG, "Stream parse error: " + ProviderRedaction.redact(e.getMessage()));
+                }
+            }
+            listener.onComplete();
+        } catch (Exception e) {
+            LogUtils.e(TAG, "onResponse data error: " + ProviderRedaction.redact(e.getMessage()));
+            listener.onError("Data error: " + ProviderRedaction.redact(e.getMessage()));
             listener.onComplete();
         }
     }

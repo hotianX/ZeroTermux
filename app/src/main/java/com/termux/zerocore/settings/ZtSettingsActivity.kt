@@ -8,7 +8,6 @@ import com.example.xh_lib.utils.UUtils
 import com.termux.R
 import com.termux.app.activities.SettingsActivity
 import com.termux.zerocore.ai.activity.MainAiSettings
-import com.termux.zerocore.ai.deepseek.activity.ZeroTermuxDeepSeekSettingsActivity
 
 class ZtSettingsActivity : BaseTitleActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
