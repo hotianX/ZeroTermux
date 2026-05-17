@@ -1,4 +1,4 @@
-﻿package com.termux.zerocore.ai.llm.data;
+package com.termux.zerocore.ai.llm.data;
 
 import android.content.Context;
 import android.text.Spanned;

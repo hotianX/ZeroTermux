@@ -1,4 +1,4 @@
-﻿package com.termux.zerocore.ai.provider;
+package com.termux.zerocore.ai.provider;
 
 import com.example.xh_lib.utils.UUtils;
 import com.termux.R;

@@ -1,4 +1,4 @@
-﻿package com.termux.zerocore.ai.activity
+package com.termux.zerocore.ai.activity
 
 import android.content.Intent
 import android.os.Bundle
